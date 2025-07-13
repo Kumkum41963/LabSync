@@ -1,5 +1,5 @@
 import { inngest, NonRetriableError } from "inngest";
-import User from '../../models/user.model'
+import User from '../../models/user.model.js'
 
 export const onUserSignup = inngest.createfunction(
     { id: "on-user-signup", retries: 2 },
