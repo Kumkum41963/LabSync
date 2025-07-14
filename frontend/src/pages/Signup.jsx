@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Signup = () => {
   const [form, setForm] = useState({
@@ -8,7 +9,6 @@ const Signup = () => {
   });
 
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
 
   const handleChange = e => {
@@ -20,39 +20,68 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      fetch(
+      const res = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/auth/signup`,
-
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify,
-        }
+        form
       );
 
-      const data = await res.json()
+      console.log("Signup response:", res.data);
 
-      if(res.ok){
-        localStorage.setItem("token",data.token)
-        localStorage.setItem("user",JSON.stringify(data.user))
-        navigate('/')
-      }else{
-        alert(data.message || 'signup failed')
-      }
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
-
+      navigate("/");
     } catch (error) {
-        alert('something went wrong in signup')
-        console.log('signup error',error.message)
-    }
-    finally {
-        setLoading(false)
+      console.log("Signup error:", error);
+
+      const message =
+        error.response?.data?.message || "Signup failed. Please try again.";
+      alert(message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return <div>Signup</div>;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-base-200">
+      <div className="card w-full max-w-sm shadow-xl bg-base-100">
+        <form onSubmit={handleSignup} className="card-body">
+          <h2 className="card-title justify-center">Sign Up</h2>
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            className="input input-bordered"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            className="input input-bordered"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
+
+          <div className="form-control mt-4">
+            <button
+              type="submit"
+              className="btn btn-primary w-full"
+              disabled={loading}
+            >
+              {loading ? "Signing up..." : "Sign Up"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default Signup;
+

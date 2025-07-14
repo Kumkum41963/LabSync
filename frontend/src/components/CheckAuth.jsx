@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect,useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const CheckAuth = ({ children, protectedRoute }) => {
@@ -22,10 +22,13 @@ const CheckAuth = ({ children, protectedRoute }) => {
         setLoading(false)
       }
     }
+
+      setLoading(false)
   }, [navigate, protectedRoute])
 
   if (loading) {
     return <div>loading...</div>
+    
   }
 
   return children

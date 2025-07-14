@@ -1,4 +1,4 @@
 import {Inngest} from 'inngest'
 
-export const inngest = new Innngest ({id:'ticketing-system'})
+export const inngest = new Inngest ({id:'ticketing-system'})
 
