@@ -10,8 +10,10 @@ export const onUserSignup = inngest.createFunction(
         try {
             const { email } = event.data
 
+
+
             // pipeline 1
-            await step.run("get-user-email", async () => {
+            const user = await step.run("get-user-email", async () => {
                 const userObject = await User.findOne({ email })
                 if (!userObject) {
                     throw new NonRetriableError('User no longer exists in our DB')

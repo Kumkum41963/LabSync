@@ -21,9 +21,10 @@ export default function TicketDetails() {
             },
           }
         );
+        console.log('single ticket details:', res.data.ticket)
         setTicket(res.data.ticket);
       } catch (err) {
-        console.error("Fetch ticket error:", err);
+        console.error("Fetch ticket error from ticket details:", err);
         const msg = err.response?.data?.message || "Something went wrong";
         alert(msg);
       } finally {

@@ -77,26 +77,29 @@ export const getTickets = async (req, res) => {
     }
 }
 
-
 export const getTicket = async (req, res) => {
     try {
         const user = req.user
 
-        let tickets;
+        let ticket;
 
         if (user.role !== 'user') {
-            ticket = Ticket
+            ticket = await Ticket
                 .findbyId(req.params.id)
                 .populate('assignedTo', ['email', '_id'])
         } else {
-            ticket = await Ticket.findOne(
-                {
-                    createdBy: user._id,
-                    _id: req.params.id
-                }
-            )
+            // is a user 
+            ticket = await Ticket
+                .findOne(
+                    {
+                        createdBy: user._id,
+                        _id: req.params.id
+                    }
+                )
                 .select('title description status createdAt')
         }
+
+        console.log('consoling single ticket:', ticket)
 
         if (!ticket) {
             return res.status(404).json({ message: 'Ticket not found' })
@@ -106,7 +109,7 @@ export const getTicket = async (req, res) => {
 
     } catch (error) {
         console.log('Error fetching single ticket', error.message)
-        return res.status(500).json({ message: 'Internal Server Error' })
+        return res.status(500).json({ message: 'Internal Server Error from get single ticket' })
     }
 }
 
