@@ -64,7 +64,7 @@ export const getTickets = async (req, res) => {
                 .sort({ createdAt: -1 })
         }
 
-        console.log('consoling the arr of tickets:', tickets)
+        // console.log('consoling the arr of tickets:', tickets)
 
         return res.status(200).json({
             message: 'showering the tickets:',
@@ -84,9 +84,7 @@ export const getTicket = async (req, res) => {
         let ticket;
 
         if (user.role !== 'user') {
-            ticket = await Ticket
-                .findbyId(req.params.id)
-                .populate('assignedTo', ['email', '_id'])
+            ticket = await Ticket.findById(req.params.id).populate('assignedTo', ['email', '_id'])
         } else {
             // is a user 
             ticket = await Ticket
