@@ -24,7 +24,6 @@ export default function TicketDetails() {
         );
         console.log('single ticket details:', res.data.ticket)
         setTicket(res.data.ticket);
-        alert('single ticket fetched for display')
       }
       catch (err) {
         console.error("Fetch ticket error from ticket details:", err);

@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import CheckAuth from "./components/CheckAuth.jsx";
-import Tickets from "./pages/Tickets.jsx"
+import Tickets from "./pages/Tickets.jsx";
 import TicketDetails from "./pages/TicketDetails.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
@@ -21,17 +21,14 @@ createRoot(document.getElementById("root")).render(
             </CheckAuth>
           }
         />
-
         <Route
           path="/tickets/:id"
           element={
-            <TicketDetails />
-            // <CheckAuth protected={true}>
-            //   <TicketDetails />
-            // </CheckAuth>
+            <CheckAuth protected={true}>
+              <TicketDetails />
+            </CheckAuth>
           }
         />
-
         <Route
           path="/login"
           element={
@@ -40,7 +37,6 @@ createRoot(document.getElementById("root")).render(
             </CheckAuth>
           }
         />
-
         <Route
           path="/signup"
           element={
@@ -49,14 +45,12 @@ createRoot(document.getElementById("root")).render(
             </CheckAuth>
           }
         />
-
         <Route
           path="/admin"
           element={
-            <Admin />
-            // <CheckAuth protected={true}>
-            //   <Admin />
-            // </CheckAuth>
+            <CheckAuth protected={true}>
+              <Admin />
+            </CheckAuth>
           }
         />
       </Routes>
