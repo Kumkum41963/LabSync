@@ -2,6 +2,11 @@ import dotenv from 'dotenv'
 dotenv.config()
 import nodemailer from 'nodemailer'
 
+console.log({
+  host: process.env.MAILTRAP_SMTP_HOST,
+  port: process.env.MAILTRAP_SMTP_PORT,
+});
+
 export const sendMail = async (to, subject, text) => {
     try {
         // Create a test account or replace with real credentials.

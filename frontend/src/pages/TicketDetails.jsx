@@ -5,6 +5,7 @@ import axios from "axios";
 
 export default function TicketDetails() {
   const { id } = useParams();
+  console.log('checking id from ticket details', id)
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,11 +24,14 @@ export default function TicketDetails() {
         );
         console.log('single ticket details:', res.data.ticket)
         setTicket(res.data.ticket);
-      } catch (err) {
+        alert('single ticket fetched for display')
+      }
+      catch (err) {
         console.error("Fetch ticket error from ticket details:", err);
         const msg = err.response?.data?.message || "Something went wrong";
         alert(msg);
-      } finally {
+      }
+      finally {
         setLoading(false);
       }
     };
@@ -44,48 +48,47 @@ export default function TicketDetails() {
       <h2 className="text-2xl font-bold mb-4">Ticket Details</h2>
 
       <div className="card bg-gray-800 shadow p-4 space-y-4">
-        <h3 className="text-xl font-semibold">{ticket.title}</h3>
-        <p>{ticket.description}</p>
+        <h3 className="text-xl font-semibold">{ticket.title || "Untitled Ticket"}</h3>
+        <p>{ticket.description || "No description available."}</p>
 
         {/* Conditionally render extended details */}
-        {ticket.status && (
+        {ticket && (
           <>
             <div className="divider">Metadata</div>
             <p>
-              <strong>Status:</strong> {ticket.status}
+              <strong>Status:</strong> {ticket.status || "Unknown"}
             </p>
-            {ticket.priority && (
-              <p>
-                <strong>Priority:</strong> {ticket.priority}
-              </p>
-            )}
-            {ticket.relatedSkills?.length > 0 && (
-              <p>
-                <strong>Related Skills:</strong>{" "}
-                {ticket.relatedSkills.join(", ")}
-              </p>
-            )}
-            {ticket.helpfulNotes && (
-              <div>
-                <strong>Helpful Notes:</strong>
-                <div className="prose max-w-none rounded mt-2">
-                  <ReactMarkdown>{ticket.helpfulNotes}</ReactMarkdown>
-                </div>
+            <p>
+              <strong>Priority:</strong> {ticket.priority || "Unknown"}
+            </p>
+            <p>
+              <strong>Related Skills:</strong>{" "}
+              {ticket.relatedSkills?.length > 0
+                ? ticket.relatedSkills.join(", ")
+                : "None"}
+            </p>
+            <div>
+              <strong>Helpful Notes:</strong>
+              <div className="prose max-w-none rounded mt-2">
+                <ReactMarkdown>
+                  {ticket.helpfulNotes || "No notes available."}
+                </ReactMarkdown>
               </div>
-            )}
-            {ticket.assignedTo && (
-              <p>
-                <strong>Assigned To:</strong> {ticket.assignedTo?.email}
-              </p>
-            )}
-            {ticket.createdAt && (
-              <p className="text-sm text-gray-500 mt-2">
-                Created At: {new Date(ticket.createdAt).toLocaleString()}
-              </p>
-            )}
+            </div>
+            <p>
+              <strong>Assigned To:</strong>{" "}
+              {ticket.assignedTo?.email || "Unassigned"}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Created At:{" "}
+              {ticket.createdAt
+                ? new Date(ticket.createdAt).toLocaleString()
+                : "Unknown"}
+            </p>
           </>
         )}
       </div>
     </div>
+
   );
 }
