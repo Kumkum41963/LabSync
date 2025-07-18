@@ -10,7 +10,7 @@ export const onTicketCreated = inngest.createFunction(
     { event: 'ticket/created' },
     async ({ event, step }) => {
         try {
-            //  getting ticket id from the event
+            // getting ticket id from the event
             const { ticketId } = event.data
 
             // fetch ticket from DB
@@ -40,7 +40,7 @@ export const onTicketCreated = inngest.createFunction(
                 let skills = []
                 if (aiResponse) {
                     await Ticket.findByIdAndUpdate(ticket._id, {
-                        priority: ['low', 'medium', 'high'].includes(aiResponse.priority) ? aiResponse.priority : 'medium',
+                        priority: !['low', 'medium', 'high'].includes(aiResponse.priority) ? 'medium':aiResponse.priority,
                         helpfulNotes: aiResponse.helpfulNotes,
                         status: 'IN_PROGRESS',
                         relatedSkills: aiResponse.relatedSkills
@@ -58,7 +58,7 @@ export const onTicketCreated = inngest.createFunction(
                     role: 'moderator',
                     skills: {
                         $elemMatch: {
-                            $regex: relatedSkills.join('|'),
+                            $regex: relatedSkills.join("|"),
                             $options: 'i',
                         }
                     }

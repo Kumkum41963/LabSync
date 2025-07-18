@@ -10,7 +10,7 @@ export const createTicket = async (req, res) => {
         if (!title || !description) {
             return res
                 .status(400)
-                .json({ message: 'Title and desc. are required' })
+                .json({ message: 'Title and description are required' })
         }
 
         // create ticket 
@@ -22,7 +22,7 @@ export const createTicket = async (req, res) => {
 
         console.log('consoling the new created ticket', newTicket)
 
-        // 
+        // trigger the event to inngest for background workers to work on it
         await inngest.send({
             name: 'ticket/created',
             data: {
@@ -37,6 +37,7 @@ export const createTicket = async (req, res) => {
             messsage: 'Ticket created and processing started',
             ticket: newTicket
         })
+
     } catch (error) {
         console.log('error from createTicket')
         return res.status(500).json({ message: 'Internal Server Error' })
