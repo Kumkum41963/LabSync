@@ -1,48 +1,108 @@
 import { inngest } from '../inngest/client.js'
 import Ticket from '../models/ticket.js'
 
+// export const createTicket = async (req, res) => {
+//     try {
+//         // get the data from body
+//         const { title, description } = req.body
+
+//         // see if all req. matches 
+//         if (!title || !description) {
+//             return res
+//                 .status(400)
+//                 .json({ message: 'Title and description are required' })
+//         }
+
+//         // create ticket 
+//         const newTicket = await Ticket.create({
+//             title,
+//             description,
+//             createdBy: req.user._id.toString()
+//         })
+
+//         console.log('consoling the new created ticket', newTicket)
+
+//         // trigger the event to inngest for background workers to work on it
+//         inngest.send({
+//             name: 'ticket/created',
+//             data: {
+//                 ticketId: (await newTicket)._id.toString(),
+//                 title,
+//                 description,
+//                 createdBy: req.user._id.toString()
+//             }
+//         })
+
+//         // console.log('checking ticket updated or not after ai parsing:', updatedTicket)
+
+//         return res.status(201).json({
+//             messsage: 'Ticket created and processing started',
+//             ticket: newTicket
+//         })
+
+//     } catch (error) {
+//         console.error('error from createTicket', error.message)
+//         return res.status(500).json({ message: 'Internal Server Error' })
+//     }
+// }
+
 export const createTicket = async (req, res) => {
     try {
-        // get the data from body
-        const { title, description } = req.body
+        const { title, description } = req.body;
 
-        // see if all req. matches 
         if (!title || !description) {
             return res
                 .status(400)
-                .json({ message: 'Title and description are required' })
+                .json({ message: "Title and description are required" });
         }
 
-        // create ticket 
+        // 1. Create ticket
         const newTicket = await Ticket.create({
             title,
             description,
-            createdBy: req.user._id.toString()
-        })
+            createdBy: req.user._id.toString(),
+        });
 
-        console.log('consoling the new created ticket', newTicket)
+        console.log("Newly created ticket:", newTicket);
 
-        // trigger the event to inngest for background workers to work on it
-        await inngest.send({
-            name: 'ticket/created',
+        // 2. Trigger background AI processing via Inngest
+        const updatedTicket = await inngest.send({
+            name: "ticket/created",
             data: {
-                ticketId: (await newTicket)._id.toString(),
+                ticketId: newTicket._id.toString(),
                 title,
                 description,
-                createdBy: req.user._id.toString()
-            }
-        })
+                createdBy: req.user._id.toString(),
+            },
+        });
+
+        // 3. Poll for AI update (wait until AI has updated the ticket)
+        // const MAX_RETRIES = 10;
+        // let updatedTicket = null;
+
+        // for (let i = 0; i < MAX_RETRIES; i++) {
+        //   await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1s
+        //   const check = await Ticket.findById(newTicket._id).populate('assignedTo', ['email', '_id']);
+
+        //   if (check?.status === "IN_PROGRESS" || check?.helpfulNotes || check?.priority !== "TODO") {
+        //     updatedTicket = check;
+        //     break;
+        //   }
+        // }
+
+        if (!updatedTicket) {
+            updatedTicket = await Ticket.findById(newTicket._id);
+        }
 
         return res.status(201).json({
-            messsage: 'Ticket created and processing started',
-            ticket: newTicket
-        })
-
+            message: "Ticket created and AI processing started",
+            ticket: updatedTicket,
+        });
     } catch (error) {
-        console.log('error from createTicket')
-        return res.status(500).json({ message: 'Internal Server Error' })
+        console.error("error from createTicket", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
 export const getTickets = async (req, res) => {
     try {

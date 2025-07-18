@@ -23,8 +23,10 @@ export default function TicketDetails() {
             },
           }
         );
-        console.log('single ticket details:', res.data.ticket)
+        
         setTicket(res.data.ticket);
+
+        console.log('single ticket details:', res.data.ticket)
       }
       catch (err) {
         console.error("Fetch ticket error from ticket details:", err);
@@ -94,3 +96,78 @@ export default function TicketDetails() {
     </>
   );
 }
+
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import { useParams } from "react-router-dom";
+
+// const TicketDetails = () => {
+//   const { id } = useParams();
+//   const [ticket, setTicket] = useState(null);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const token = localStorage.getItem("token");
+
+//   useEffect(() => {
+//     let interval;
+
+//     const fetchTicket = async () => {
+//       try {
+//         const res = await axios.get(
+//           `${import.meta.env.VITE_SERVER_URL}/tickets/${id}`,
+//           {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//             },
+//           }
+//         );
+
+//         const updatedTicket = res.data.ticket;
+//         setTicket(updatedTicket);
+//         setIsLoading(false);
+
+//         // 👇 Check if AI is done enriching
+//         const aiDone =
+//           updatedTicket.relatedSkills?.length > 0 ||
+//           updatedTicket.priority !== "LOW" ||
+//           updatedTicket.status === "IN_PROGRESS" ||
+//           updatedTicket.helpfulNotes?.length > 0;
+
+//         if (aiDone && interval) {
+//           clearInterval(interval);
+//         }
+//       } catch (err) {
+//         console.error("Error fetching ticket:", err);
+//       }
+//     };
+
+//     // Initial fetch
+//     fetchTicket();
+
+//     // Poll every 3 seconds
+//     interval = setInterval(fetchTicket, 3000);
+
+//     // Cleanup on unmount
+//     return () => clearInterval(interval);
+//   }, [id]);
+
+//   if (isLoading || !ticket) return <div>Loading ticket details...</div>;
+
+//   return (
+//     <div className="p-4">
+//       <h1 className="text-2xl font-semibold">Ticket Details</h1>
+//       <p><strong>Title:</strong> {ticket.title}</p>
+//       <p><strong>Status:</strong> {ticket.status}</p>
+//       <p><strong>Priority:</strong> {ticket.priority}</p>
+//       <p><strong>Description:</strong> {ticket.description}</p>
+//       <p><strong>Helpful Notes:</strong> {ticket.helpfulNotes || "Processing..."}</p>
+//       <p><strong>Related Skills:</strong> 
+//         {ticket.relatedSkills?.length > 0
+//           ? ticket.relatedSkills.join(", ")
+//           : "Processing..."}
+//       </p>
+//     </div>
+//   );
+// };
+
+// export default TicketDetails;
+

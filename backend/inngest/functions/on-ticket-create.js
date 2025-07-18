@@ -30,17 +30,23 @@ export const onTicketCreated = inngest.createFunction(
                 await Ticket.findByIdAndUpdate(ticket._id, {
                     status: 'TODO'
                 })
+
+                // ✅ refetch updated ticket
+                const updatedTicket = await Ticket.findById(ticketId);
+                console.log("ticket after ai", updatedTicket); // ✅ this will now include aiResponse
             })
 
-            // grab res from ai
+            // grab the parsed res from ai
             const aiResponse = await analyzeTicket(ticket)
+
+            console.log('checking the parsed ai response:', aiResponse)
 
             // assign the related skills and return em 
             const relatedSkills = await step.run('ai-processing', async () => {
                 let skills = []
                 if (aiResponse) {
                     await Ticket.findByIdAndUpdate(ticket._id, {
-                        priority: !['low', 'medium', 'high'].includes(aiResponse.priority) ? 'medium':aiResponse.priority,
+                        priority: !['low', 'medium', 'high'].includes(aiResponse.priority) ? 'medium' : aiResponse.priority,
                         helpfulNotes: aiResponse.helpfulNotes,
                         status: 'IN_PROGRESS',
                         relatedSkills: aiResponse.relatedSkills
@@ -90,7 +96,17 @@ export const onTicketCreated = inngest.createFunction(
                 }
             })
 
-            return { success: true }
+
+            // ✅ refetch updated ticket
+            const updatedTicketTwo = await Ticket.findById(ticketId);
+            console.log("ticket after ai part 2", updatedTicketTwo); // ✅ this will now include aiResponse
+
+
+
+            return {
+                success: true,
+                ticket: updatedTicketTwo,
+            };
 
         } catch (error) {
             console.log('error running steps in on ticket create', error.message)
