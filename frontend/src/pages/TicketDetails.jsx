@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
+import Navbar from "../components/Navbar.jsx"
 
 export default function TicketDetails() {
   const { id } = useParams();
@@ -43,6 +44,8 @@ export default function TicketDetails() {
   if (!ticket) return <div className="text-center mt-10">Ticket not found</div>;
 
   return (
+    <>
+    <Navbar />
     <div className="max-w-3xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Ticket Details</h2>
 
@@ -88,6 +91,6 @@ export default function TicketDetails() {
         )}
       </div>
     </div>
-
+    </>
   );
 }

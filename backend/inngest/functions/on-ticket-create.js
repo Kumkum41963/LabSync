@@ -3,7 +3,7 @@ import { sendMail } from '../../utils/mailer.js'
 import { analyzeTicket } from "../../utils/aiAgent.js";
 import User from '../../models/user.js'
 import Ticket from "../../models/ticket.js";
-import {inngest} from '../client.js'
+import { inngest } from '../client.js'
 
 export const onTicketCreated = inngest.createFunction(
     { id: 'on-ticket-created', retries: 2 },
@@ -40,7 +40,7 @@ export const onTicketCreated = inngest.createFunction(
                 let skills = []
                 if (aiResponse) {
                     await Ticket.findByIdAndUpdate(ticket._id, {
-                        priority: ['low', 'medium', 'high'].includes(aiResponse.priority) ? aiResponse.priority : 'medium' ,
+                        priority: ['low', 'medium', 'high'].includes(aiResponse.priority) ? aiResponse.priority : 'medium',
                         helpfulNotes: aiResponse.helpfulNotes,
                         status: 'IN_PROGRESS',
                         relatedSkills: aiResponse.relatedSkills
@@ -51,8 +51,8 @@ export const onTicketCreated = inngest.createFunction(
                 return skills
             })
 
-// relatedSkills was returned so we could find moderator based on it which is done here
-// assign moderator
+            // relatedSkills was returned so we could find moderator based on it which is done here
+            // assign moderator
             const moderator = await step.run('assign-moderator', async () => {
                 let user = await User.findOne({
                     role: 'moderator',
