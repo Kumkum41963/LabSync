@@ -1,117 +1,87 @@
 import { NonRetriableError } from "inngest";
-import { sendMail } from '../../utils/mailer.js'
 import { analyzeTicket } from "../../utils/aiAgent.js";
-import User from '../../models/user.js'
+import { sendMail } from '../../utils/mailer.js';
 import Ticket from "../../models/ticket.js";
-import { inngest } from '../client.js'
+import User from "../../models/user.js";
+import { inngest } from '../client.js';
 
 export const onTicketCreated = inngest.createFunction(
     { id: 'on-ticket-created', retries: 2 },
     { event: 'ticket/created' },
     async ({ event, step }) => {
+        const ticketId = event.data.ticketId;
+        console.log("[pipeline] Starting for ticket:", ticketId);
+
         try {
-            // getting ticket id from the event
-            const { ticketId } = event.data
-
             // fetch ticket from DB
-            const ticket = await step.run('fetch-ticket', async () => {
+            const ticket = await step.run("fetch-ticket", async () => {
+                const t = await Ticket.findById(ticketId);
+                if (!t) throw new NonRetriableError("Ticket not found");
+                return t;
+            });
 
-                const ticketObject = await Ticket.findById(ticketId)
+            // sens this to aiAgent for its work 
+            const aiResponse = await analyzeTicket(ticket);
+            console.log("[pipeline] AI response:", aiResponse);
 
-                if (!ticketObject) {
-                    throw new NonRetriableError('ticket not found')
+            // set response of ai to data 
+            let relatedSkills = [];
+            await step.run("apply-ai", async () => {
+                // no response
+                if (!aiResponse) {
+                    console.warn("[pipeline] No AI response — skipping AI update");
+                    return;
                 }
 
-                return ticketObject
-            })
-
-            // run the ticket for updated
-            await step.run('update-ticket-status', async () => {
+                // set skills
+                relatedSkills = Array.isArray(aiResponse.relatedSkills) ? aiResponse.relatedSkills : [];
+                const priority = ['low', 'medium', 'high'].includes(aiResponse.priority)
+                    ? aiResponse.priority
+                    : 'medium';
+                
+                // update in the DB
                 await Ticket.findByIdAndUpdate(ticket._id, {
-                    status: 'TODO'
-                })
+                    status: 'in_progress',
+                    priority,
+                    helpfulNotes: aiResponse.helpfulNotes || '',
+                    relatedSkills
+                });
+            });
 
-                // ✅ refetch updated ticket
-                const updatedTicket = await Ticket.findById(ticketId);
-                console.log("ticket after ai", updatedTicket); // ✅ this will now include aiResponse
-            })
-
-            // grab the parsed res from ai
-            const aiResponse = await analyzeTicket(ticket)
-
-            console.log('checking the parsed ai response:', aiResponse)
-
-            // assign the related skills and return em 
-            const relatedSkills = await step.run('ai-processing', async () => {
-                let skills = []
-                if (aiResponse) {
-                    await Ticket.findByIdAndUpdate(ticket._id, {
-                        priority: !['low', 'medium', 'high'].includes(aiResponse.priority) ? 'medium' : aiResponse.priority,
-                        helpfulNotes: aiResponse.helpfulNotes,
-                        status: 'IN_PROGRESS',
-                        relatedSkills: aiResponse.relatedSkills
-                    })
-                    skills = aiResponse.relatedSkills
-                }
-
-                return skills
-            })
-
-            // relatedSkills was returned so we could find moderator based on it which is done here
-            // assign moderator
-            const moderator = await step.run('assign-moderator', async () => {
-                let user = await User.findOne({
+            // set moderator based on skills
+            const moderator = await step.run("assign-moderator", async () => {
+                let mod = await User.findOne({
                     role: 'moderator',
-                    skills: {
-                        $elemMatch: {
-                            $regex: relatedSkills.join("|"),
-                            $options: 'i',
-                        }
-                    }
-                })
+                    skills: { $elemMatch: { $regex: relatedSkills.join("|"), $options: 'i' } }
+                });
+                if (!mod) mod = await User.findOne({ role: 'admin' });
 
-                if (!user) {
-                    user = await User.findOne({
-                        role: 'admin',
-                    })
-                }
-
-
+                // update assignment
                 await Ticket.findByIdAndUpdate(ticket._id, {
-                    assignedTo: user?._id || null
-                })
+                    assignedTo: mod ? mod._id : null
+                });
+                return mod;
+            });
 
-                return user
-            })
+            // send mail
+            await step.run("notify", async () => {
+                if (!moderator) return;
+                await sendMail(
+                    moderator.email,
+                    "New Ticket Assigned",
+                    `You’ve been assigned ticket: "${ticket.title}"`
+                );
+            });
 
-            // send email to them as they have been assigned as a moderator
-            await step.run('send-email-notification', async () => {
-                if (moderator) {
-                    const finalTicket = await Ticket.findById(ticket._id)
-                    await sendMail(
-                        moderator.email,
-                        'Ticket Assigned',
-                        `A new ticket is assigned to you ${finalTicket.title}`
-                    )
-                }
-            })
+            // get final updated ticket from DB and return
+            const finalTicket = await Ticket.findById(ticketId)
+                .populate('assignedTo', ['email', '_id']);
+            console.log("[pipeline] Completed for ticket:", finalTicket._id.toString());
 
-
-            // ✅ refetch updated ticket
-            const updatedTicketTwo = await Ticket.findById(ticketId);
-            console.log("ticket after ai part 2", updatedTicketTwo); // ✅ this will now include aiResponse
-
-
-
-            return {
-                success: true,
-                ticket: updatedTicketTwo,
-            };
-
-        } catch (error) {
-            console.log('error running steps in on ticket create', error.message)
-            return { success: false }
+            return { success: true, ticket: finalTicket };
+        } catch (err) {
+            console.error("[pipeline] Error:", err);
+            return { success: false, error: err.message };
         }
     }
-)
-
+);
