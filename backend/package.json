@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "inngest-dev":"npx inngest-cli@latest dev"
+    "inngest-dev":"npx inngest-cli@latest dev",
+    "inngest-worker": "node inngest-worker.js"
   },
   "keywords": [],
   "author": "",
