@@ -52,28 +52,28 @@ Ticket information:
 - Title: ${ticket.title}
 - Description: ${ticket.description}`);
 
-// this has to be 'content' here and not context
- 
-  console.log('🧠 Raw AI response content:', response?.output?.[0]?.content);
+  // this has to be 'content' here and not context
+
+  console.log('Raw AI response content:', response?.output?.[0]?.content);
 
   const raw = response?.output?.[0]?.content || 'raw still undefined';
-  
+
   try {
     // Check if wrapped in markdown and strip it
     const match = raw.match(/```json\s*([\s\S]*?)\s*```/i);
     const jsonString = match ? match[1] : raw.trim();
 
-    console.log('🔍 Extracted JSON string:', jsonString);
+    console.log('Extracted JSON string:', jsonString);
 
     const parsed = JSON.parse(jsonString);
 
-    console.log('✅ Successfully parsed JSON:', parsed);
+    console.log('Successfully parsed JSON:', parsed);
 
     return parsed;
 
   } catch (e) {
-    console.error('❌ Failed to parse JSON from AI response:', e.message);
-    console.log('⚠️ Raw string that failed parsing:', raw);
+    console.error('Failed to parse JSON from AI response:', e.message);
+    console.log('Raw string that failed parsing:', raw);
     return null;
   }
 };

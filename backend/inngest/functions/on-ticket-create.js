@@ -6,8 +6,8 @@ import User from "../../models/user.js";
 import { inngest } from '../client.js';
 
 export const onTicketCreated = inngest.createFunction(
-    { id: 'on-ticket-created', retries: 2 },
-    { event: 'ticket/created' },
+    { id: 'on-ticket-created', retries: 2 }, // key
+    { event: 'ticket/created' }, // trigerring
     async ({ event, step }) => {
         const ticketId = event.data.ticketId;
         console.log("[pipeline] Starting for ticket:", ticketId);
@@ -35,10 +35,10 @@ export const onTicketCreated = inngest.createFunction(
 
                 // set skills
                 relatedSkills = Array.isArray(aiResponse.relatedSkills) ? aiResponse.relatedSkills : [];
-                const priority = ['low', 'medium', 'high'].includes(aiResponse.priority)
+                const priority = ['low', 'medium', 'high', 'urgent'].includes(aiResponse.priority)
                     ? aiResponse.priority
                     : 'medium';
-                
+
                 // update in the DB
                 await Ticket.findByIdAndUpdate(ticket._id, {
                     status: 'in_progress',
@@ -74,8 +74,8 @@ export const onTicketCreated = inngest.createFunction(
             });
 
             // get final updated ticket from DB and return
-            const finalTicket = await Ticket.findById(ticketId)
-                .populate('assignedTo', ['email', '_id']);
+            const finalTicket = await Ticket.findById(ticketId).populate('assignedTo', ['email', '_id']);
+            console.log("[pipeline] Completed for finalTicket:", finalTicket)
             console.log("[pipeline] Completed for ticket:", finalTicket._id.toString());
 
             return { success: true, ticket: finalTicket };

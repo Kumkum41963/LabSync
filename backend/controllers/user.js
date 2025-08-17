@@ -7,19 +7,38 @@ export const signup = async (req, res, next) => {
     const { email, password, skills = [] } = req.body
     try {
         const hashed = await bcrypt.hash(password, 10)
-        const user = await User.create({ email, password: hashed, skills })
-        // fire inngest event 
-        await inngest.send({
-            name: 'user/signup',
-            data: {
-                email
-            }
+
+        console.log('user creating!!!')
+
+        const user = await User.create({ 
+            email, 
+            password: hashed, 
+            skills,
+            role: 'user'
         })
+
+        console.log('user creating ended!!!')
+        
+        // fire inngest event 
+        try {
+            const inngestRes = await inngest.send({
+                name: 'user/signup',
+                data: {
+                    email
+                }
+            })
+            console.log('inngest res from signup', inngestRes)
+        } catch (error) {
+            console.log('inngestRes error from signup', error)
+        }
+
 
         const token = jwt.sign({
             _id: user._id,
             role: user.role
         }, process.env.JWT_SECRET)
+        
+        console.log('signup successful!!!')
 
         res.json({ user, token })
 
