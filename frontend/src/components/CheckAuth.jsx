@@ -1,38 +1,4 @@
-// import React, { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// export default function CheckAuth({ children, protectedRoute }) {
-//   const navigate = useNavigate();
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const token = localStorage.getItem("token");
-
-//     if (protectedRoute) {
-//       if (!token) {
-//         navigate("/login");
-//       } else {
-//         setLoading(false);
-//       }
-//     } else {
-//       if (token) {
-//         navigate("/");
-//       } else {
-//         setLoading(false);
-//       }
-//     }
-//   }, [navigate, protectedRoute]);
-
-//   if (loading) {
-//     return <div>loading...</div>;
-//   }
-
-
-//   return children;
-// }
-
-
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function CheckAuth({ children, protected: protectedRoute }) {
@@ -45,17 +11,17 @@ export default function CheckAuth({ children, protected: protectedRoute }) {
 
     if (protectedRoute) {
       if (!token) {
-        setLoading(false); // ✅ stop loading BEFORE navigating
+        setLoading(false); 
         navigate("/login");
       } else {
-        setLoading(false); // ✅ allow children to render
+        setLoading(false); 
       }
     } else {
       if (token) {
-        setLoading(false); // ✅ stop loading BEFORE navigating
+        setLoading(false); 
         navigate("/");
       } else {
-        setLoading(false); // ✅ allow public page to render
+        setLoading(false);
       }
     }
   }, [navigate, protectedRoute]);

@@ -49,6 +49,7 @@ export default function TicketDetails() {
 
   useEffect(() => {
     let interval;
+
     const fetch = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/tickets/${id}`, {
@@ -63,18 +64,21 @@ export default function TicketDetails() {
     };
 
     fetch();
+
+    // start re-fetching
     interval = setInterval(() => {
       if (
+        // not yet fetched the ai response
         ticket &&
         (ticket.status === "open" ||
           (ticket.status === "in_progress" &&
             (!ticket.helpfulNotes || ticket.relatedSkills.length === 0)))
       ) {
-        fetch();
-      } else clearInterval(interval);
+        fetch(); // re fetch 
+      } else clearInterval(interval); // stop fetching now
     }, 3000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); 
   }, [id, token, ticket]);
 
   if (loading) return <div className="mt-10 text-center text-gray-300">Loading...</div>;
@@ -87,7 +91,7 @@ export default function TicketDetails() {
         <h2 className="text-3xl font-bold mb-6 text-sky-400">🎫 Ticket Details</h2>
 
         <div className="rounded-xl bg-[#243447] shadow-lg shadow-blue-900/30 border border-gray-700 p-6 space-y-5">
-          <h3 className="text-2xl font-semibold text-cyan-300">{ticket.title}</h3>
+          <h3 className="text-2xl font-semibold text-cyan-300">{ticket.title}</h3> 
 
           <p className="text-gray-300 whitespace-pre-wrap">{ticket.description}</p>
 
