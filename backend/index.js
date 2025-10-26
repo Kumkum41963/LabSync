@@ -24,6 +24,7 @@ app.use("/api/auth", userRoutes);
 
 app.use("/api/tickets", ticketRoutes);
 
+// mount inngest on express 
 app.use(
   "/api/inngest",
   serve({
