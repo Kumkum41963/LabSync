@@ -19,15 +19,20 @@ export const createTicket = async (req, res) => {
 
     console.log("Ticket created in DB:", newTicket);
 
-    await inngest.send({
-      name: "ticket/created",
-      data: {
-        ticketId: newTicket._id.toString(),
-        title,
-        description,
-        createdBy: req.user._id.toString(),
-      },
-    });
+    try {
+      await inngest.send({
+        name: "ticket/created",
+        data: {
+          ticketId: newTicket._id.toString(),
+          title,
+          description,
+          createdBy: req.user._id.toString(),
+        },
+      });
+    } catch (error) {
+      console.error('⚠️ Inngest event failed at createTicket:', error.message);
+    }
+
 
     console.log("Inngest event sent for ticket creation");
 

@@ -17,7 +17,7 @@ export default function Tickets() {
     setFetchLoading(true);
     setError("");
     try {
-      const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/tickets`, {
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/tickets`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTickets(res.data.tickets ?? []);
@@ -41,7 +41,7 @@ export default function Tickets() {
     setSubmitLoading(true);
     setError("");
     try {
-      const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/tickets`, form, {
+      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/tickets`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setForm({ title: "", description: "" });

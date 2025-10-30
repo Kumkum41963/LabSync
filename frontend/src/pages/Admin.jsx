@@ -17,7 +17,7 @@ export default function Admin() {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/auth/users`, {
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/auth/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -40,7 +40,7 @@ export default function Admin() {
   const handleUpdate = async () => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/auth/update-user`,
+        `${import.meta.env.VITE_BASE_URL}/auth/update-user`,
         {
           email: editingUser,
           role: formData.role,

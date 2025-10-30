@@ -52,7 +52,7 @@ export default function TicketDetails() {
 
     const fetch = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/tickets/${id}`, {
+        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/tickets/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setTicket(res.data.ticket);
