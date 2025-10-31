@@ -1,25 +1,56 @@
-// src/utils/AppRoutes.jsx
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "@/components/layout/Layout";
+import AuthForm from "@/components/auth/AuthForm";
+import Dashboard from "@/pages/Dashboard";
+import CheckAuth from "@/utils/CheckAuth";
+import Unauthorized from "@/pages/Unauthorized";
+import NotFound from "@/pages/NotFound";
+import Tickets from "@/pages/Tickets";
+import Notices from "@/pages/Notices";
+import Applications from "@/pages/Applications";
+import Inventory from "@/pages/Inventory";
 
-/*
-  ProtectedRoute: only allows access if user is logged in.
-  RoleRoute: only allows access if logged in AND has one of allowed roles.
-  We use <Outlet /> pattern with react-router v6 to wrap nested routes.
-*/
+const AppRoutes = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* 🌐 Public Routes */}
+        <Route path="/login" element={<AuthForm type="login" />} />
+        <Route path="/signup" element={<AuthForm type="signup" />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
 
-export const ProtectedRoute = ({ redirectTo = "/login" }) => {
-  const { user } = useAuth();
-  return user ? <Outlet /> : <Navigate to={redirectTo} replace />;
+        {/* 🔒 Protected Routes (Requires Authentication) */}
+        <Route
+          path="/"
+          element={
+            <CheckAuth
+              allowedRoles={["admin", "moderator", "student", "lab assistant"]}
+            >
+              <Layout />
+            </CheckAuth>
+          }
+        >
+          {/* 🏠 Default dashboard route */}
+          <Route index element={<Dashboard />} />
+
+          {/* 🎟️ Tickets */}
+          <Route path="tickets" element={<Tickets />} />
+
+          {/* 🧾 Applications */}
+          <Route path="applications" element={<Applications />} />
+
+          {/* 📢 Notices */}
+          <Route path="notices" element={<Notices />} />
+
+          {/* 📦 Inventory */}
+          <Route path="inventory" element={<Inventory />} />
+        </Route>
+
+        {/* ❌ Fallback routes */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
 };
 
-export const RoleRoute = ({ allowedRoles = [], redirectTo = "/" }) => {
-  const { user } = useAuth();
-  // if not logged in -> go to login
-  if (!user) return <Navigate to="/login" replace />;
-  // if role not allowed -> redirect to fallback
-  if (!allowedRoles.includes(user.role)) return <Navigate to={redirectTo} replace />;
-  // allowed -> render children (Outlet)
-  return <Outlet />;
-};
+export default AppRoutes;

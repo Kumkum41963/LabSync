@@ -1,87 +1,111 @@
 import { useEffect, useState, useContext, createContext } from "react";
-import useAxios from "@/hooks/useAxios";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const AuthContext = createContext(null)
+// Create global auth context
+const AuthContext = createContext(null);
 
+// Provider component wrapping the entire app
 export const AuthProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authToken, setAuthToken] = useState(localStorage.getItem("token"));
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
-    const axiosInstance = useAxios()
-    const navigate = useNavigate();     // for redirecting after login/signup
-    const [user, setUser] = useState(() => {
-        // load user from localStorage if present (initial state)
-        const raw = localStorage.getItem("user");
-        return raw ? JSON.parse(raw) : null;
-    });
-    const [loading, setLoading] = useState(false)
+  // Fetch user whenever so token changes
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!authToken) {
+        setCurrentUser(null);
+        setIsLoadingAuth(false);
+        return; // Ecit fxn early if no logged-in user
+      }
 
-
-    // SIGNUP: call backend register endpoint, save token & user on success
-    const signup = async ({ name, email, password, role = "student" }) => {
-        setLoading(true);
-        try {
-            // adjust endpoint to match your backend; common is POST /auth/register or /auth/signup
-            const res = await axiosInstance.post("/auth/signup", { name, email, password, role });
-            // backend should return { token, user }
-            const { token, user: userObj } = res.data;
-
-            // persist token & user locally
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify(userObj));
-
-            // update context
-            setUser(userObj);
-
-            // success — redirect to dashboard or tickets
-            navigate("/");
-
-            return { success: true };
-        } catch (err) {
-            // return useful error message to caller
-            const message = err.response?.data?.message || err.message || "Signup failed";
-            console.error("Signup error at authContext:", message);
-            return { success: false, message };
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // LOGIN: call backend login endpoint, save token & user on success
-    const login = async (email, password) => {
-        setLoading(true)
-
-        try {
-            const res = await axiosInstance.post("/auth/login", { email, password })
-            const { token, user: userObj } = res.data;
-            localStorage.setItem("token", token)
-            localStorage.setItem("user", JSON.stringify(userObj))
-            setUser(userObj)
-            navigate("/"); // redirect after login
-            return { success: true }
-        } catch (error) {
-            const message = err.response?.data?.message || err.message || "Login failed";
-            console.error("Login error:", message);
-            return { success: false, message };
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const logout = () => {
+      try {
+        const res = await axios.get("/api/auth/current-user", {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        setCurrentUser(res.data.user);
+      } catch (err) {
+        console.error("Token validation failed:", err.message);
         localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setUser(null);
-        navigate("/login");
+        setCurrentUser(null);
+      } finally {
+          // Stop showing loading spinner whether request succeeded or failed
+        setIsLoadingAuth(false);
+      }
     };
 
+    fetchUserProfile();
+  }, [authToken]);
 
-    return (
-        <AuthContext.Provider value={{ user, login, logout, loading , signup}}>
-            {children}
-        </AuthContext.Provider>
-    )
+  // handle login + store token n user
+  const handleLogin = async (credentials) => {
+    try {
+      const res = await axios.post("/api/auth/login", credentials);
+      const { token, user } = res.data;
+      console.log("token:", token);
+      console.log("user:", user);
 
-}
+      localStorage.setItem("token", token);
+      setAuthToken(token);
+      setCurrentUser(user);
+
+      console.log('successful login')
+
+      return user;
+    } catch (err) {
+      console.error("Login failed:", err.message);
+      throw new Error(err.res?.data?.message || "Login failed");
+    }
+  };
+
+  // handle signup + store token n user
+  const handleSignup = async (credentials) => {
+    try {
+      const res = await axios.post("/api/auth/signup", credentials);
+      const { token, user } = res.data;
+      console.log("token:", token);
+      console.log("user:", user);
+
+      localStorage.setItem("token", token);
+      setAuthToken(token);
+      setCurrentUser(user);
+
+      console.log('successful signup')
+
+      return user;
+    } catch (err) {
+      console.error("Signup failed:", err.message);
+      throw new Error(err.res?.data?.message || "Signup failed");
+    }
+  };
+
+  // Clear local storage and logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setAuthToken(null);
+    setCurrentUser(null);
+  };
+
+  return (
+     // Everything inside "value" is accessible by other components
+  // that use the useAuthContext() hook below.
+    <AuthContext.Provider
+      value={{
+        currentUser,
+        authToken,
+        isLoadingAuth,
+        handleLogin,
+        handleLogout,
+        handleSignup,
+        isAuthenticated: !!currentUser,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
 // Custom hook for consuming AuthContext
-export const useAuth = () => useContext(AuthContext);
+// This is a convenience function so that components can call useAuthContext()
+// instead of useContext(AuthContext) directly.
+export const useAuthContext = () => useContext(AuthContext);

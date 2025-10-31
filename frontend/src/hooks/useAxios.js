@@ -1,20 +1,38 @@
 import axios from "axios";
+import { useEffect } from "react";
+import { useAuth } from "./useAuth";
 
-// A hook that returns an axios instance with token support
-
+// Reusable hook that automatically attaches the JWT token to every API req.
 const useAxios = () => {
-    const token = localStorage.getItem("token") // get token from client 
+  const { authToken, handleLogout } = useAuth();
 
-    const instance = axios.create({
-        baseURL: import.meta.env.VITE_BASE_URL,
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : ""
-        },
-    })
-    console.log("log from useAxios:",import.meta.env.VITE_API_URL)
+  useEffect(() => {
+    const axiosInstance = axios.create({
+      baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:3000",
+    });
 
-    return instance;
-}
+    // Add JWT headers for every req.
+    axiosInstance.interceptors.request.use(
+      config => {
+        if (authToken) config.headers.Authorization = `Bearer ${authToken}`;
+        return config;  // Always return config to continue request
+      },
+      error => Promise.reject(error)
+    );
 
-export default useAxios
+    // Automatically logout if token invalid
+    axiosInstance.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response?.status === 401) handleLogout();
+        return Promise.reject(error);
+      }
+    );
+
+    axios.defaults = axiosInstance.defaults;
+  }, [authToken, handleLogout]);
+
+  return axiosInstance
+};
+
+export default useAxios;
