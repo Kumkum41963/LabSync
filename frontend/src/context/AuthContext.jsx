@@ -60,6 +60,7 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser(user);
 
       console.log("successful login");
+      console.log('actual stored user:', currentUser)
       console.log('token:', token)
       console.log('currentUser:', user)
 
