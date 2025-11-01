@@ -19,7 +19,7 @@ const AuthForm = ({ type }) => {
 
   const [loading, setLoading] = useState(false);
 
-  const isLogin = type === "login";
+  const isLogin = (type === "login");
 
   // Handle input changes
   const handleChange = (e) => {

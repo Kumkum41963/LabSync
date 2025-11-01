@@ -10,17 +10,20 @@ export const AuthProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState(localStorage.getItem("token"));
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
+  const API = import.meta.env.VITE_BASE_URL;
+
+
   // Fetch user whenever so token changes
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!authToken) {
         setCurrentUser(null);
         setIsLoadingAuth(false);
-        return; // Ecit fxn early if no logged-in user
+        return; // Exit fxn early if no logged-in user
       }
 
       try {
-        const res = await axios.get("/api/auth/current-user", {
+        const res = await axios.get(`${API}/auth/current-user`, {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         setCurrentUser(res.data.user);
@@ -29,7 +32,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("token");
         setCurrentUser(null);
       } finally {
-          // Stop showing loading spinner whether request succeeded or failed
+        // Stop showing loading spinner whether request succeeded or failed
         setIsLoadingAuth(false);
       }
     };
@@ -40,7 +43,7 @@ export const AuthProvider = ({ children }) => {
   // handle login + store token n user
   const handleLogin = async (credentials) => {
     try {
-      const res = await axios.post("/api/auth/login", credentials);
+      const res = await axios.post(`${API}/auth/login`, credentials);
       const { token, user } = res.data;
       console.log("token:", token);
       console.log("user:", user);
@@ -49,7 +52,9 @@ export const AuthProvider = ({ children }) => {
       setAuthToken(token);
       setCurrentUser(user);
 
-      console.log('successful login')
+      console.log("successful login");
+      console.log('token:',token)
+      console.log('currentUser:',user)
 
       return user;
     } catch (err) {
@@ -61,7 +66,7 @@ export const AuthProvider = ({ children }) => {
   // handle signup + store token n user
   const handleSignup = async (credentials) => {
     try {
-      const res = await axios.post("/api/auth/signup", credentials);
+      const res = await axios.post(`${API}/auth/signup`, credentials);
       const { token, user } = res.data;
       console.log("token:", token);
       console.log("user:", user);
@@ -70,7 +75,9 @@ export const AuthProvider = ({ children }) => {
       setAuthToken(token);
       setCurrentUser(user);
 
-      console.log('successful signup')
+      console.log("successful signup");
+      console.log('token:',token)
+      console.log('currentUser:',user)
 
       return user;
     } catch (err) {
@@ -87,8 +94,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-     // Everything inside "value" is accessible by other components
-  // that use the useAuthContext() hook below.
+    // Everything inside "value" is accessible by other components
+    // that use the useAuthContext() hook below.
     <AuthContext.Provider
       value={{
         currentUser,

@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import AuthForm from "@/components/auth/AuthForm";
 import Dashboard from "@/pages/Dashboard";
 import CheckAuth from "@/utils/CheckAuth";
 import Unauthorized from "@/pages/Unauthorized";
@@ -9,14 +8,16 @@ import Tickets from "@/pages/Tickets";
 import Notices from "@/pages/Notices";
 import Applications from "@/pages/Applications";
 import Inventory from "@/pages/Inventory";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
 
 const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
         {/* 🌐 Public Routes */}
-        <Route path="/login" element={<AuthForm type="login" />} />
-        <Route path="/signup" element={<AuthForm type="signup" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
         {/* 🔒 Protected Routes (Requires Authentication) */}

@@ -97,6 +97,7 @@ Login a new user
 */
 export const login = async (req, res) => {
   try {
+    console.log('req body', req.body)
     const { email, password } = req.body;
 
     // 1️⃣ Validate input

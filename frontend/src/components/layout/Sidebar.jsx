@@ -27,7 +27,7 @@ const Sidebar = () => {
   ];
 
   // Admin-only menu item
-  if (user?.role === "admin") {
+  if (currentUser?.role === "admin") {
     menuItems.push({ label: "Admin Panel", path: "/admin", icon: Shield });
   }
 
