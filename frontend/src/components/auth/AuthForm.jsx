@@ -33,9 +33,16 @@ const AuthForm = ({ type }) => {
 
     try {
       if (isLogin) {
-        await handleLogin(form.email, form.password, form.role);
+        // send an object to server for destructuring
+        await handleLogin({
+          email: form.email,
+          password: form.password,
+          role: form.role,
+        });
+        navigate("/");
       } else {
         await handleSignup(form);
+        navigate("/");
       }
     } catch (error) {
       console.error(`${isLogin ? "Login" : "Signup"} failed:`, error);

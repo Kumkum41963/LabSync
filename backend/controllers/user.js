@@ -122,6 +122,8 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    console.log('login successfull!!!')
+
     // 5️⃣ Return response
     res.status(200).json({
       message: "Login successful",
@@ -133,6 +135,7 @@ export const login = async (req, res) => {
       },
       token,
     });
+
   } catch (error) {
     console.error("Login error:", error.message);
     res.status(500).json({ message: "Server error during login" });
