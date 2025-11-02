@@ -23,8 +23,6 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     { label: "Home", path: "/", icon: Home },
     { label: "Tickets", path: "/tickets", icon: Ticket },
     { label: "Notices", path: "/notices", icon: Bell },
-  
-    
     { label: "Settings", path: "/settings", icon: Settings },
   ];
 
