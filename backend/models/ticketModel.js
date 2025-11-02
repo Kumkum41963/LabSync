@@ -68,6 +68,15 @@ const ticketSchema = new mongoose.Schema(
       index: true,
     },
 
+    auditLog: [
+      {
+        actionBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // who changed it
+        role: { type: String },                                          // their role (snapshot)
+        fieldsChanged: [String],                                         // what was changed
+        updatedAt: { type: Date, default: Date.now },                    // when it happened
+      },
+    ],
+
     closedAt: {
       type: Date,
       default: null,

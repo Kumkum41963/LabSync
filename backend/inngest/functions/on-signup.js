@@ -1,5 +1,5 @@
 import { NonRetriableError } from "inngest";
-import User from '../../models/user.js'
+import User from '../../models/userModel.js'
 import { inngest } from '../client.js'
 import { sendMail } from "../../utils/mailer.js";
 
