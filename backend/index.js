@@ -5,8 +5,8 @@ import cors from "cors";
 
 import connectDB from "./utils/dbConfig.js";
 
-import userRoutes from "./routes/user.js";
-import ticketRoutes from "./routes/ticket.js";
+import userRoutes from "./routes/user.route.js";
+import ticketRoutes from "./routes/ticket.route.js";
 
 import { serve } from "inngest/express";
 
@@ -22,7 +22,6 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", userRoutes);
-
 app.use("/api/tickets", ticketRoutes);
 
 // mount inngest on express 

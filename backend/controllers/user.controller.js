@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import User from "../models/userModel.js";
+import User from "../models/user.model.js";
 import { inngest } from "../inngest/client.js";
 
 /*
@@ -144,16 +144,25 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    const token = req.headers.authorization.split("")[1];
+    const authHeader = req.headers.authorization
+    const token = authHeader && authHeader.split(" ")[1];
+
+    console.log('token in logout:', token)
 
     if (!token) {
-      return res.status(401).json({ error: "Unauthorized" });
+      return res.status(401).json({ error: "Unauthorized, token not found." });
     }
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) return res.status(401).json({ error: "Unauthorized" });
-      res.json({ message: "Logout successful" });
-    });
+    // Verify token
+    jwt.verify(token, process.env.JWT_SECRET,
+      (err) => {
+        if (err) {
+          return res.status(401).json({ error: "Unauthorized, invalid token." });
+        }
+        // return success res.
+        return res.status(200).json({ message: "Logout successful" });
+      });
+
   } catch (error) {
     res.status(500).json({ error: "login failed", details: error.message });
   }
@@ -202,7 +211,7 @@ export const getCurrentUser = async (req, res) => {
 
 export const getAllUser = async (req, res) => {
   try {
-    const allowedRoles = ["admin", "moderator"];
+    const allowedRoles = ["admin", "lab_assistant"];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).json({ error: "Forbidden" });
     }
