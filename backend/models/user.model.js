@@ -38,8 +38,8 @@ const userSchema = new mongoose.Schema(
 );
 
 // find user by email/role faster via indexing
-userSchema.index({ role: 1 });
-userSchema.index({ email: 1 });
+// userSchema.index({ role: 1 });
+// userSchema.index({ email: 1 });
 
 const User = mongoose.model("User", userSchema);
 export default User;

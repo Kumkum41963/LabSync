@@ -10,8 +10,8 @@ import {
 import { authenticate, authorizedRoles } from "../middlewares/auth.js";
 
 const router = express.Router();
-
-router.post("/", authenticate, authorizedRoles(["student", "admin"]), createTicket);
+// authorizedRoles(["student", "admin"]), 
+router.post("/", authenticate, createTicket);
 router.get("/", authenticate, getTickets);
 router.get("/:id", authenticate, getTicketById);
 router.put("/:id", authenticate, updateTicketById);
