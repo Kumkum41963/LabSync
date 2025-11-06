@@ -15,7 +15,7 @@ router.post("/", authenticate, authorizedRoles("student", "admin"), createTicket
 router.get("/", authenticate, getTickets);
 router.get("/:id", authenticate, getTicketById);
 router.put("/:id", authenticate, updateTicketById);
-router.delete("/:id", authenticate, authorizedRoles(["student", "admin"]), deleteTicketById);
-router.post("/:id/assign", authenticate, authorizedRoles(["lab_assistant", "admin"]), assignModerator);
+router.delete("/:id", authenticate, authorizedRoles("student", "admin"), deleteTicketById);
+router.post("/:id/assign", authenticate, authorizedRoles("lab_assistant", "admin"), assignModerator);
 
 export default router;

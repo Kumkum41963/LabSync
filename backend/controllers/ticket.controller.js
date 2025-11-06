@@ -1,5 +1,6 @@
 import { inngest } from "../inngest/client.js";
 import Ticket from "../models/ticket.model.js";
+import User from "../models/user.model.js";
 
 // 🆕 createTicket: Student or Admin raises a new ticket
 export const createTicket = async (req, res) => {
@@ -36,7 +37,7 @@ export const createTicket = async (req, res) => {
       });
     }
 
-    if (!title || !description ){
+    if (!title || !description) {
       console.warn("⚠️ Missing required ticket fields");
       return res.status(400).json({
         message: "Title, descriptionare required",
@@ -118,12 +119,22 @@ export const getTickets = async (req, res) => {
     // Text search (title + description)
     if (search) filter.$text = { $search: search };
 
+    console.log("filter chars:", filter)
+
     // Fetch & populate based on filter
     const tickets = await Ticket.find(filter)
-      .populate("createdBy", ["name", "email", "_id"])
+      .populate("createdBy", ["name", "email", "_id", "role"])
       .populate("assignedModerator", ["name", "email", "_id"])
       .populate("assignedByLabAssistant", ["name", "email", "_id"])
       .sort({ createdAt: -1 });
+
+    // Validate ticket found
+    if (!tickets || tickets.length === 0) {
+      return res.status(200).json({
+        message: "No tickets found",
+        tickets: [],
+      });
+    }
 
     console.log(
       `✅ ${tickets.length} tickets fetched for ${user.name} ${user.role}`
@@ -146,12 +157,12 @@ export const getTicketById = async (req, res) => {
     const user = req.user;
     const ticketId = req.params.id;
     console.log(
-      `Fetching ticket with ID: ${ticketId} createdby ${user.name} and asssigned to ${user.assignedModerator.name}`
+      `Fetching ticket with ID: ${ticketId} createdby ${user.name} and asssigned to`
     );
 
     // Find the ticket and populate related fields
     const ticket = await Ticket.findById(ticketId)
-      .populate("createdBy", ["name", "email", "_id"])
+      .populate("createdBy", ["name", "email", "_id","role"])
       .populate("assignedModerator", ["name", "email", "_id"])
       .populate("assignedByLabAssistant", ["name", "email", "_id"]);
 
@@ -168,7 +179,7 @@ export const getTicketById = async (req, res) => {
     // but student needs to be creator of it
     // and moderator has to be assigned to it to view
     if (
-      (user.role === "user" && !isCreator) ||
+      (user.role === "student" && !isCreator) ||
       (user.role === "moderator" && !isAssignedModerator)
     ) {
       return res
@@ -337,7 +348,8 @@ export const assignModerator = async (req, res) => {
     );
 
     // Only lab assistant or admin can assign
-    if (!["lab_assistant", "admin"].includes(user.role)) {
+    const allowedRoles = ["lab_assistant", "admin"]
+    if (!allowedRoles.includes(user.role)) {
       return res.status(403).json({ message: "Not authorized ❌" });
     }
 
