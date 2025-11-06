@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// TODO: indexing 
 // find user by email/role faster via indexing
 // userSchema.index({ role: 1 });
 // userSchema.index({ email: 1 });

@@ -7,10 +7,10 @@ export const createTicket = async (req, res) => {
     const user = req.user;
 
     // Defensive role check 
-    // if (user.role !== "student" || user.role !== "admin") {
-    //   console.warn(`Unauthorized createTicket attempt by ${user.role}`);
-    //   return res.status(403).json({ message: "Only students can raise tickets" });
-    // }
+    if (user.role !== "student" && user.role !== "admin") {
+      console.warn(`Unauthorized createTicket attempt by ${user.role}`);
+      return res.status(403).json({ message: "Only students can raise tickets" });
+    }
 
     let { title, description, tags } = req.body;
 
@@ -29,12 +29,12 @@ export const createTicket = async (req, res) => {
     }
 
     // Validate inputs
-    // if (!title || !description || !tags || tags.length === 0) {
-    //   console.warn("⚠️ Missing required ticket fields");
-    //   return res.status(400).json({
-    //     message: "Title, description, and at least one tag are required",
-    //   });
-    // }
+    if (!title || !description || !tags || tags.length === 0) {
+      console.warn("⚠️ Missing required ticket fields");
+      return res.status(400).json({
+        message: "Title, description, and at least one tag are required",
+      });
+    }
 
     if (!title || !description ){
       console.warn("⚠️ Missing required ticket fields");
