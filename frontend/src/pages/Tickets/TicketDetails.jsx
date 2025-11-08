@@ -138,3 +138,39 @@ const TicketDetails = () => {
 }
 
 export default TicketDetails
+
+
+
+// import { useParams } from "react-router-dom";
+// import { useEffect, useState } from "react";
+// import { useTickets } from "@/hooks/useTickets";
+// import TicketStatusBadge from "@/components/tickets/TicketStatusBadge";
+// import TicketPriorityBadge from "@/components/tickets/TicketPriorityBadge";
+// import TicketTags from "@/components/tickets/TicketTags";
+
+// export default function TicketDetailsPage() {
+//   const { id } = useParams();
+//   const { fetchTicketById } = useTickets();
+//   const [ticket, setTicket] = useState(null);
+
+//   useEffect(() => {
+//     fetchTicketById(id).then(setTicket);
+//   }, [id]);
+
+//   if (!ticket)
+//     return <p className="text-gray-400 p-6">Loading ticket...</p>;
+
+//   return (
+//     <div className="p-6 text-gray-100">
+//       <h1 className="text-3xl text-indigo-400 font-semibold mb-2">
+//         {ticket.title}
+//       </h1>
+//       <div className="flex gap-2 mb-4">
+//         <TicketPriorityBadge priority={ticket.priority} />
+//         <TicketStatusBadge status={ticket.status} />
+//       </div>
+//       <p className="text-gray-300 mb-3">{ticket.description}</p>
+//       <TicketTags tags={ticket.tags} />
+//     </div>
+//   );
+// }

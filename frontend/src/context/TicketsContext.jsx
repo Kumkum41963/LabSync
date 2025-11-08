@@ -19,7 +19,7 @@ export const TicketsProvider = ({ children }) => {
     console.log('fetching tickets started!!!')
     setLoading(true); // start fetching
     try {
-      const res = await axios.get("/tickets"); // backend auto-handles filtering by role
+      const res = await axiosInstance.get("/tickets"); // backend auto-handles filtering by role
       setTickets(res.data.tickets || []);
     } catch (err) {
       console.error("❌ Failed to fetch tickets:", err);

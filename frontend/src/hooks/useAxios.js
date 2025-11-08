@@ -2,44 +2,78 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
-// Custom hook that returns an Axios instance with JWT + auto logout support
 export const useAxios = () => {
   const { authToken, handleLogout } = useAuth();
   const [axiosInstance, setAxiosInstance] = useState(null);
 
   useEffect(() => {
-    // Create a new Axios instance with base URL
+    const baseURL = import.meta.env.VITE_BASE_URL || "http://localhost:3000/api";
+
+    console.log("🧩 [useAxios] Setting up Axios instance...");
+    console.log("➡️ Base URL:", baseURL);
+    console.log("🔑 Auth Token Present:", !!authToken);
+
     const instance = axios.create({
-      baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:3000",
+      baseURL,
+      // withCredentials: true,
     });
 
-    // Add JWT token (if exists) to every request header
+    // Request interceptor
     instance.interceptors.request.use(
       (config) => {
-        if (authToken) config.headers.Authorization = `Bearer ${authToken}`;
-        return config; // Always return config to continue the request
+        console.log("🚀 [Request]", {
+          method: config.method?.toUpperCase(),
+          url: config.baseURL + config.url,
+          //  url: config.baseURL,
+          headers: config.headers,
+        });
+        if (authToken) {
+          config.headers.Authorization = `Bearer ${authToken}`;
+          console.log("✅ JWT token attached to request headers");
+        } else {
+          console.warn("⚠️ No JWT token found — sending request without auth");
+        }
+        return config;
       },
-      (error) => Promise.reject(error)
-    );
-
-    // Auto-logout user if token is invalid or expired (HTTP 401)
-    instance.interceptors.response.use(
-      (response) => response,
       (error) => {
-        if (error.response?.status === 401) handleLogout();
+        console.error("❌ [Request Error]", error);
         return Promise.reject(error);
       }
     );
 
-    // (In case) Sync global defaults — only needed if other parts use axios directly
-    axios.defaults = instance.defaults;
+    // Response interceptor
+    instance.interceptors.response.use(
+      (response) => {
+        console.log("📥 [Response]", {
+          url: response.config.url,
+          status: response.status,
+          data: response.data,
+        });
+        return response;
+      },
+      (error) => {
+        console.error("🔥 [Response Error]", {
+          url: error.config?.url,
+          status: error.response?.status,
+          message: error.message,
+          data: error.response?.data,
+        });
 
-    // Save the configured instance for later use
+        if (error.response?.status === 401) {
+          console.warn("🚫 Unauthorized (401) — triggering logout...");
+          handleLogout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    axios.defaults = instance.defaults;
     setAxiosInstance(instance);
+
+    console.log("✅ [useAxios] Axios instance configured successfully");
+
   }, [authToken, handleLogout]);
 
-  // Return the prepared Axios instance
   return axiosInstance;
 };
-
 

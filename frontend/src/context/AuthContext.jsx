@@ -6,9 +6,14 @@ const AuthContext = createContext(null);
 
 // Provider component wrapping the entire app
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(
-    JSON.parse(localStorage.getItem("user")) || null
-  );
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      return stored && stored !== "undefined" ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
   const [authToken, setAuthToken] = useState(localStorage.getItem("token"));
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 

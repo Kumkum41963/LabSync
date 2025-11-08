@@ -137,8 +137,10 @@ export const getTickets = async (req, res) => {
     }
 
     console.log(
-      `✅ ${tickets.length} tickets fetched for ${user.name} ${user.role}`
+      `✅ ${tickets.length} tickets fetched for ${user.name}with role ${user.role}`
     );
+
+    console.log("All fetched tickets:", tickets);
 
     return res.status(200).json({
       message: "Tickets fetched successfully 🟢",

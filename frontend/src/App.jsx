@@ -1,13 +1,8 @@
-import { AuthProvider } from "./context/AuthContext";
-import AppRoutes from "./utils/AppRoutes";
+import AppRoutes from "@/utils/AppRoutes";
 
 // Entry point - wraps everything inside AuthProvider
 const App = () => {
-  return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
-  );
+  return <AppRoutes />;
 };
 
 export default App;
