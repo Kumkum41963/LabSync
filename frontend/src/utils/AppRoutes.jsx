@@ -4,7 +4,7 @@ import Dashboard from "@/pages/Dashboard";
 import CheckAuth from "@/utils/CheckAuth";
 import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "@/pages/NotFound";
-import Tickets from "@/pages/Tickets";
+import Tickets from "@/pages/Tickets/Tickets";
 import Notices from "@/pages/Notices";
 import Applications from "@/pages/Applications";
 import Inventory from "@/pages/Inventory";
@@ -25,7 +25,7 @@ const AppRoutes = () => {
           path="/"
           element={
             <CheckAuth
-              allowedRoles={["admin", "moderator", "student", "lab assistant"]}
+              allowedRoles={["admin", "moderator", "student", "lab_assistant"]}
             >
               <Layout />
             </CheckAuth>

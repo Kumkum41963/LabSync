@@ -2,9 +2,18 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
+import { AuthProvider } from "@/context/AuthContext";
+import { RoleProvider } from "@/context/RoleContext";
+import { TicketsProvider } from "./context/TicketsContext";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <RoleProvider>
+        <TicketsProvider>
+          <App />
+        </TicketsProvider>
+      </RoleProvider>
+    </AuthProvider>
   </StrictMode>
 );

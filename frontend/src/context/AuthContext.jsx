@@ -125,4 +125,4 @@ export const AuthProvider = ({ children }) => {
 // Custom hook for consuming AuthContext
 // This is a convenience function so that components can call useAuthContext()
 // instead of useContext(AuthContext) directly.
-export const useAuthContext = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext);

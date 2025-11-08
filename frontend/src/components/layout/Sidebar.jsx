@@ -12,7 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const { currentUser, handleLogout } = useAuth();
@@ -20,7 +20,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
 
   const menuItems = [
-    { label: "Home", path: "/", icon: Home },
+    { label: "Dashboard", path: "/", icon: Home },
     { label: "Tickets", path: "/tickets", icon: Ticket },
     { label: "Notices", path: "/notices", icon: Bell },
     { label: "Settings", path: "/settings", icon: Settings },
