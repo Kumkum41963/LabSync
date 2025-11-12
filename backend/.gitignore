@@ -27,3 +27,5 @@ Thumbs.db
 # Optional build artifacts
 dist/
 build/
+
+seed.js

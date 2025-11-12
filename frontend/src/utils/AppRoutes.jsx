@@ -4,10 +4,17 @@ import Dashboard from "@/pages/Dashboard";
 import CheckAuth from "@/utils/CheckAuth";
 import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "@/pages/NotFound";
+
+// 📦 Main Feature Pages
 import Tickets from "@/pages/Tickets/Tickets";
+import TicketDetails from "@/pages/Tickets/TicketDetails";
+import CreateTicket from "@/pages/Tickets/CreateTicket";
+import UpdateTicket from "@/pages/Tickets/UpdateTicket";
+
 import Notices from "@/pages/Notices";
 import Applications from "@/pages/Applications";
 import Inventory from "@/pages/Inventory";
+
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 
@@ -31,11 +38,16 @@ const AppRoutes = () => {
             </CheckAuth>
           }
         >
-          {/* 🏠 Default dashboard route */}
+          {/* 🏠 Dashboard */}
           <Route index element={<Dashboard />} />
 
-          {/* 🎟️ Tickets */}
-          <Route path="tickets" element={<Tickets />} />
+          {/* 🎟️ Tickets (Main + Subroutes) */}
+          <Route path="tickets">
+            <Route index element={<Tickets />} /> {/* /tickets */}
+            <Route path="create" element={<CreateTicket />} /> {/* /tickets/create */}
+            <Route path=":id" element={<TicketDetails />} /> {/* /tickets/:id */}
+            <Route path=":id/edit" element={<UpdateTicket />} /> {/* /tickets/:id/edit */}
+          </Route>
 
           {/* 🧾 Applications */}
           <Route path="applications" element={<Applications />} />
@@ -47,7 +59,7 @@ const AppRoutes = () => {
           <Route path="inventory" element={<Inventory />} />
         </Route>
 
-        {/* ❌ Fallback routes */}
+        {/* ❌ Fallback route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
@@ -55,3 +67,4 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
+

@@ -1,119 +1,203 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/context/AuthContext";
 import { useRole } from "@/context/RoleContext";
 import { useAxios } from "@/hooks/useAxios";
 
 const TicketsContext = createContext();
 
 export const TicketsProvider = ({ children }) => {
-  const axiosInstance = useAxios()
-  const { user } = useAuth()
-  const { role, permissions } = useRole()
+  const axiosInstance = useAxios();
+  const { currentUser } = useAuth();
+  const { role, permissions } = useRole();
 
-  const [tickets, setTickets] = useState()
-  const [loading, setLoading] = useState(false)
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // GET/Fetch tickets 
+  // ===========================================================
+  // 📡 FETCH ALL TICKETS
+  // ===========================================================
   const getTickets = async () => {
-    if (!user) return; // no fetching 
-    console.log('fetching tickets started!!!')
-    setLoading(true); // start fetching
+    if (!currentUser) {
+      console.warn("⚠️ [TicketsContext] No user found, skipping fetch.");
+      return;
+    }
+    if (!axiosInstance) {
+      console.warn("⚠️ [TicketsContext] Axios instance not ready yet.");
+      return;
+    }
+
+    console.group("📡 [getTickets]");
+    console.log("👤 User:", currentUser?.email || currentUser?._id);
+    console.log("🌍 Endpoint:", axiosInstance.defaults.baseURL + "/tickets");
+
+    setLoading(true);
     try {
-      const res = await axiosInstance.get("/tickets"); // backend auto-handles filtering by role
+      const res = await axiosInstance.get("/tickets");
+      console.log("✅ Response data:", res.data);
       setTickets(res.data.tickets || []);
     } catch (err) {
-      console.error("❌ Failed to fetch tickets:", err);
+      console.error("❌ [getTickets] Error fetching tickets:", err);
     } finally {
       setLoading(false);
+      console.log("⏹️ Loading stopped");
+      console.groupEnd();
     }
   };
 
-  // Create a new ticket
-  const createTicket = async (data) => {
-    if (!permissions.canCreate) {
-      return alert("Not allowed to create ticket")
-    };
+  // ===========================================================
+  // 🔍 FETCH SINGLE TICKET BY ID
+  // ===========================================================
+  const getTicketById = async (id) => {
+    console.group("🔍 [getTicketById]");
+    setLoading(true);
     try {
-      const res = await axiosInstance.post("/tickets", data);
-      setTickets((prev) => [...prev, res.data.ticket]); // create new arr. to add 
-    } catch (err) {
-      console.error("❌ Error creating ticket:", err);
+      const res = await axiosInstance.get(`/tickets/${id}`);
+      console.log("✅ Response data:", res.data);
+      return res.data.ticket;
+    } catch (error) {
+      console.error("❌ [getTicketById] Error fetching ticket by ID:", error);
+    } finally {
+      setLoading(false);
+      console.groupEnd();
     }
   };
 
-  // Update a ticket
+  // ===========================================================
+  // 🆕 CREATE NEW TICKET
+  // ===========================================================
+  const createTicket = async (data) => {
+    console.group("🆕 [createTicket]");
+    if (!permissions?.canCreate) {
+      console.warn("🚫 Not allowed to create tickets");
+      console.groupEnd();
+      return;
+    }
+
+    try {
+      console.log("📦 Payload:", data);
+      const res = await axiosInstance.post("/tickets", data);
+      console.log("✅ Ticket created:", res.data.ticket);
+      setTickets((prev) => [...prev, res.data.ticket]);
+      return res.data.ticket;
+    } catch (err) {
+      console.error("❌ [createTicket] Error:", err);
+    } finally {
+      console.groupEnd();
+    }
+  };
+
+  // ===========================================================
+  // ✏️ UPDATE EXISTING TICKET
+  // ===========================================================
   const updateTicket = async (id, updates) => {
+    console.group("✏️ [updateTicket]");
+    console.log("🆔 ID:", id);
+    console.log("📦 Updates:", updates);
+
     try {
       const res = await axiosInstance.put(`/tickets/${id}`, updates);
+      console.log("✅ Updated ticket:", res.data.updatedTicket);
       setTickets((prev) =>
         prev.map((t) => (t._id === id ? res.data.updatedTicket : t))
       );
+      return res.data.updatedTicket;
     } catch (err) {
-      console.error("❌ Error updating ticket:", err);
+      console.error("❌ [updateTicket] Error:", err);
+    } finally {
+      console.groupEnd();
     }
   };
 
-  // Delete a ticket
+  // ===========================================================
+  // 🗑️ DELETE TICKET
+  // ===========================================================
   const deleteTicket = async (id) => {
-    if (!permissions.canDelete && !permissions.canDeleteOwn) {
-      return alert("Not allowed to delete ticket");
+    console.group("🗑️ [deleteTicket]");
+    console.log("🆔 ID:", id);
+
+    if (!permissions?.canDelete && !permissions?.canDeleteOwn) {
+      console.warn("🚫 Not allowed to delete tickets");
+      console.groupEnd();
+      return;
     }
+
     try {
       await axiosInstance.delete(`/tickets/${id}`);
       setTickets((prev) => prev.filter((t) => t._id !== id));
+      console.log("✅ Ticket deleted successfully");
     } catch (err) {
-      console.error("❌ Error deleting ticket:", err);
+      console.error("❌ [deleteTicket] Error:", err);
+    } finally {
+      console.groupEnd();
     }
   };
 
-  // Assign mods (lab_assistant/admin)
+  // ===========================================================
+  // 🎯 ASSIGN MODERATOR (ADMIN / LAB ASSISTANT ONLY)
+  // ===========================================================
   const assignModerator = async (ticketId, moderatorId) => {
+    console.group("🎯 [assignModerator]");
+    console.log("🆔 Ticket:", ticketId);
+    console.log("🧍 Moderator:", moderatorId);
+
     if (!["lab_assistant", "admin"].includes(role)) {
-      return alert("You are not authorized to assign moderators");
+      console.warn("🚫 Unauthorized role:", role);
+      console.groupEnd();
+      return;
     }
 
     try {
       const res = await axiosInstance.post(`/tickets/${ticketId}/assign`, {
         moderatorId,
       });
-
-      // Update the assigned ticket in state
+      console.log("✅ Updated ticket:", res.data.ticket);
       setTickets((prev) =>
         prev.map((t) => (t._id === ticketId ? res.data.ticket : t))
       );
-
-      console.log("✅ Moderator assigned successfully");
     } catch (err) {
-      console.error("❌ Error assigning moderator:", err);
+      console.error("❌ [assignModerator] Error:", err);
+    } finally {
+      console.groupEnd();
     }
   };
 
-  // Manual refresh helper (for refresh button)
+  // ===========================================================
+  // 🔁 REFRESH / RELOAD ALL TICKETS
+  // ===========================================================
   const refreshTickets = async () => {
-    console.log("🔁 Refreshing tickets...");
+    console.group("🔁 [refreshTickets]");
     await getTickets();
+    console.groupEnd();
   };
 
-  // Fetch tickets when user logs in or changes
+  // ===========================================================
+  // ⚙️ AUTO FETCH ON USER LOGIN
+  // ===========================================================
   useEffect(() => {
-    if (user) {
-      getTickets()
-    };
-  }, [user]);
+    console.log(
+      "🧠 [TicketsContext] useEffect triggered (user or axios change)",
+      { currentUser, axiosReady: !!axiosInstance }
+    );
+    if (currentUser && axiosInstance) getTickets();
+  }, [currentUser, axiosInstance]);
 
+  // ===========================================================
+  // PROVIDER EXPORT
+  // ===========================================================
   return (
     <TicketsContext.Provider
       value={{
         tickets,
         loading,
+        role,
+        permissions,
         getTickets,
-        refreshTickets,
+        getTicketById,
         createTicket,
         updateTicket,
         deleteTicket,
         assignModerator,
-        permissions,
-        role,
+        refreshTickets,
       }}
     >
       {children}
@@ -121,5 +205,7 @@ export const TicketsProvider = ({ children }) => {
   );
 };
 
-// Custom hook for consuming tickets context easily
+// ===========================================================
+// 🔄 CUSTOM HOOK
+// ===========================================================
 export const useTickets = () => useContext(TicketsContext);

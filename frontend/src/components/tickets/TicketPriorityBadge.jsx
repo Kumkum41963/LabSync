@@ -1,4 +1,5 @@
 import React from 'react'
+import { Badge } from "@/components/ui/badge";
 
 const priorityColors = {
   low: "bg-blue-500/20 text-blue-300 border-blue-500/30",

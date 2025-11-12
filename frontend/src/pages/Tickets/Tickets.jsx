@@ -1,41 +1,37 @@
-import { useState, useEffect } from "react";
-import { useRole } from "@/context/RoleContext";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTickets } from "@/context/TicketsContext";
 import TicketList from "@/components/tickets/TicketList";
-import TicketForm from "@/components/tickets/TicketForm";
 import RaiseTicketButton from "@/components/tickets/RaiseTicketButton";
+import { useAuth } from "@/context/AuthContext";
 
-export default function Tickets() {
-  const { role } = useRole();
-  const { tickets, getTickets, createTicket } = useTickets();
-  const [creating, setCreating] = useState(false);
+const Tickets = () => {
+  const navigate = useNavigate();
+  const { tickets, getTickets } = useTickets();
+  const { currentUser } = useAuth();
 
-  // in every mount we fetch the tickets again to keep it updated
   useEffect(() => {
-    getTickets();
+    getTickets(); // load all tickets on mount
   }, []);
 
+  const handleTicketClick = (ticket) => {
+    navigate(`/tickets/${ticket._id}`); // go to ticket details
+  };
+
   return (
-    <div className="p-6 text-gray-100">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-indigo-400">Tickets</h1>
-        {(role === "student" || role === "admin")  && <RaiseTicketButton />}
+    <div className="min-h-screen bg-[#0d1117] text-white p-4 sm:p-6 md:p-10 transition-all">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+          Tickets
+        </h1>
+        <RaiseTicketButton />
       </div>
 
-      {(role === "student" || role === "admin") && creating ? (
-        // show the for to create ticket
-        <TicketForm
-          onSubmit={async (data) => {
-            await createTicket(data);
-            setCreating(false);
-          }}
-          loading={false}
-        />
-      ) : (
-        // else display all fetched tickets from DB 
-        <TicketList tickets={tickets} onTicketClick={(t) => console.log("View", t)} />
-      )}
+      {/* Grid/List view - can later switch based on role */}
+      <TicketList tickets={tickets} onTicketClick={handleTicketClick} />
     </div>
   );
-}
+};
 
+export default Tickets;
