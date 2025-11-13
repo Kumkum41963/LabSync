@@ -1,130 +1,130 @@
-// import { useParams } from "react-router-dom";
-// import { useEffect, useState } from "react";
-// import { useTickets } from "@/hooks/useTickets";
-// import TicketStatusBadge from "@/components/tickets/TicketStatusBadge";
-// import TicketPriorityBadge from "@/components/tickets/TicketPriorityBadge";
-// import TicketTags from "@/components/tickets/TicketTags";
-
-// export default function TicketDetailsPage() {
-//   const { id } = useParams();
-//   const { fetchTicketById } = useTickets();
-//   const [ticket, setTicket] = useState(null);
-
-//   useEffect(() => {
-//     fetchTicketById(id).then(setTicket);
-//   }, [id]);
-
-//   if (!ticket)
-//     return <p className="text-gray-400 p-6">Loading ticket...</p>;
-
-//   return (
-//     <div className="p-6 text-gray-100">
-//       <h1 className="text-3xl text-indigo-400 font-semibold mb-2">
-//         {ticket.title}
-//       </h1>
-//       <div className="flex gap-2 mb-4">
-//         <TicketPriorityBadge priority={ticket.priority} />
-//         <TicketStatusBadge status={ticket.status} />
-//       </div>
-//       <p className="text-gray-300 mb-3">{ticket.description}</p>
-//       <TicketTags tags={ticket.tags} />
-//     </div>
-//   );
-// }
-
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useTickets } from "@/context/TicketsContext";
-import TicketStatusBadge from "@/components/tickets/TicketStatusBadge";
-import TicketPriorityBadge from "@/components/tickets/TicketPriorityBadge";
+import BackButton from "@/components/tickets/BackButton";
 import TicketTags from "@/components/tickets/TicketTags";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import TicketInfoGrid from "@/components/tickets/TicketInfoGrid";
+import TicketSection from "@/components/tickets/TicketSection";
+import ActionButton from "@/components/tickets/ActionButton";
 
 const TicketDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { getTicketById } = useTickets();
   const [ticket, setTicket] = useState(null);
 
+  // ✅ Fetch ticket when component mounts or id changes
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchTicket = async () => {
       const data = await getTicketById(id);
       setTicket(data);
     };
-    fetchData();
-  }, [id]);
+    fetchTicket();
+  }, [id, getTicketById]);
 
-  if (!ticket) {
+  if (!ticket)
     return (
-      <div className="text-gray-400 text-center mt-20">Loading ticket...</div>
+      <div className="flex items-center justify-center h-screen text-gray-400">
+        Loading ticket...
+      </div>
     );
-  }
 
   return (
-    <div className="min-h-screen bg-[#0d1117] text-gray-200 p-4 sm:p-6 md:p-10">
-      {/* Back Button */}
-      <div className="flex items-center gap-2 mb-6">
-        <Button
-          onClick={() => navigate("/tickets")}
-          variant="ghost"
-          className="text-gray-300 hover:text-white hover:bg-slate-800"
-        >
-          <ArrowLeft size={18} className="mr-2" /> Back
-        </Button>
+    <div className="min-h-screen bg-[#0a0f14] text-gray-200 px-4 sm:px-6 md:px-10 py-6">
+      {/* 🔙 Back Button */}
+      <div className="mb-6">
+        <BackButton label="Back to Tickets" />
       </div>
 
-      {/* Ticket Card */}
-      <div className="bg-[#111827] border border-slate-700 rounded-2xl p-5 sm:p-7 max-w-4xl mx-auto shadow-lg shadow-blue-900/20">
-        <h2 className="text-xl sm:text-2xl font-semibold text-gray-100 mb-2">
-          {ticket.title}
-        </h2>
+      {/* 🎟️ Ticket Container */}
+      <div
+        className="
+          bg-[#0d1117] border border-slate-800 rounded-2xl 
+          shadow-lg shadow-cyan-900/30 
+          max-w-6xl mx-auto p-6 sm:p-8
+        "
+      >
+        {/* ---- Header Section ---- */}
+        <header className="mb-6 border-b border-slate-700 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1
+              className="
+                text-2xl sm:text-3xl font-semibold tracking-tight
+                bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500
+                bg-clip-text text-transparent
+              "
+            >
+              {ticket.title}
+            </h1>
 
-        <div className="flex flex-wrap gap-3 mb-4">
-          <TicketStatusBadge status={ticket.status} />
-          <TicketPriorityBadge priority={ticket.priority} />
-        </div>
-
-        <p className="text-gray-400 leading-relaxed mb-4 whitespace-pre-line">
-          {ticket.description}
-        </p>
-
-        <TicketTags tags={ticket.tags} />
-
-        <div className="border-t border-slate-800 mt-6 pt-4 flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
-          <div className="flex items-center gap-3">
-            <img
-              src={ticket.createdBy?.avatar || "https://via.placeholder.com/32"}
-              alt=""
-              className="w-10 h-10 rounded-full border border-slate-600"
-            />
-            <div>
-              <p className="text-sm text-gray-500">Created by</p>
-              <p className="text-gray-300 font-medium">
-                {ticket.createdBy?.name || "Unknown"}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                {new Date(ticket.createdAt).toLocaleString("en-GB")}
-              </p>
+            {/* ---- Tags ---- */}
+            <div className="mt-2 border-t border-slate-800 pt-1">
+              {ticket.tags?.length > 0 ? (
+                <TicketTags tags={ticket.tags} />
+              ) : (
+                <p className="text-gray-500 italic">No tags assigned.</p>
+              )}
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => navigate(`/tickets/${ticket._id}/edit`)}
-            >
-              Edit
-            </Button>
-            {/* <Button
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => )}
-            >
-              Delete
-            </Button> */}
+          {/* ✏️🗑️ Edit / Delete Buttons */}
+          <div className="mt-4 sm:mt-0 flex justify-start sm:justify-end">
+            <ActionButton ticketId={ticket._id} />
           </div>
+        </header>
+
+        {/* ---- Info Grid Section ---- */}
+        <TicketInfoGrid
+          status={ticket.status}
+          priority={ticket.priority}
+          createdBy={ticket.createdBy}
+          assignedTo={ticket.assignedModerator}
+          assignedBy={ticket.assignedByLabAssistant}
+        />
+
+        {/* ---- Description + AI Summary in Grid ---- */}
+        <div
+          className="
+            mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 
+          "
+        >
+          <TicketSection title="Description">
+            {ticket.description ? (
+              <p>{ticket.description}</p>
+            ) : (
+              <p className="text-gray-500 italic">No description provided.</p>
+            )}
+          </TicketSection>
+
+          <TicketSection title="AI Summary">
+            {ticket.aiSummary ? (
+              <p>{ticket.aiSummary}</p>
+            ) : (
+              <p className="text-gray-500 italic">No AI summary available.</p>
+            )}
+          </TicketSection>
+        </div>
+
+        {/* ---- Meta Info ---- */}
+        <div
+          className="
+            mt-8 border-t border-dotted border-slate-700 pt-4 
+            flex flex-wrap justify-between text-xs sm:text-sm text-gray-400
+          "
+        >
+          <p>
+            <span className="text-gray-500">Created at: </span>
+            {new Date(ticket.createdAt).toLocaleString("en-GB")}
+          </p>
+          <p>
+            <span className="text-gray-500">Updated at: </span>
+            {new Date(ticket.updatedAt).toLocaleString("en-GB")}
+          </p>
+          {ticket.closedAt && (
+            <p>
+              <span className="text-gray-500">Closed at: </span>
+              {new Date(ticket.closedAt).toLocaleString("en-GB")}
+            </p>
+          )}
         </div>
       </div>
     </div>

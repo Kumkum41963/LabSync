@@ -16,11 +16,13 @@ const RaiseTicketButton = ({ variant = "default", size = "sm" }) => {
         text-sm sm:text-base font-medium
         rounded-xl transition-all duration-300 ease-out
 
-        bg-gradient-to-r from-slate-700 to-indigo-700
-        hover:from-slate-600 hover:to-indigo-600
         text-white
-        shadow-md shadow-indigo-900/30 hover:shadow-lg hover:shadow-indigo-500/40
-        focus:ring-2 focus:ring-indigo-400/60 focus:outline-none
+        bg-gradient-to-r from-teal-800 via-cyan-800 to-blue-900
+        hover:from-teal-600 hover:via-sky-800 hover:to-indigo-900
+        border border-cyan-500/50
+        shadow-md shadow-blue-900/40
+        hover:shadow-lg hover:shadow-violet-500/40
+        focus:ring-2 focus:ring-teal-400/40 focus:outline-none
         active:scale-[0.98]
       `}
     >
