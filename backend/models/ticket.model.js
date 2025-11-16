@@ -17,12 +17,12 @@ const ticketSchema = new mongoose.Schema(
       type: [String],
       default: [],
       required: [true, "Tags is required"],
-      // index: true,
+      index: true,
     },
 
     status: {
       type: String,
-      enum: ["open", "in_progress",  "resolved", "closed"],
+      enum: ["open", "in_progress", "resolved", "closed"],
       default: "open",
       index: true,
       // TODO: reopen with notifs
@@ -45,6 +45,7 @@ const ticketSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
+      index: true, // filter for moderator dashboards
     },
 
     assignedByLabAssistant: {
@@ -94,13 +95,20 @@ ticketSchema.pre("save", function (next) {
   next();
 });
 
-// TODO: Indexing
-// , tags: 1
-// ticketSchema.index({ title: "text", description: "text" }); // supports search
-// ticketSchema.index({ createdBy: 1, assignedModerator: 1, status: 1 }); // role-based filtering
+// search bar: title + description
+ticketSchema.index({ title: "text", description: "text" });
 
-// ticketSchema.index({ title: "text", description: "text" }); 
-// ticketSchema.index({ tags: 1 });
+// common dashboard filters + sorting
+ticketSchema.index({ createdAt: -1 });
+ticketSchema.index({ status: 1, createdAt: -1 });
+ticketSchema.index({ priority: 1, createdAt: -1 });
+
+// // tag → skill recommendation matching
+// ticketSchema.index({ tags: 1, relatedSkills: 1 });
+
+// // moderator dashboard filtering
+// ticketSchema.index({ assignedModerator: 1, status: 1 });
+
 
 
 const Ticket = mongoose.model("Ticket", ticketSchema);

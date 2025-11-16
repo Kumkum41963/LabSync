@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Email is required"],
       unique: true,
       lowercase: true,
+      trim: true,
       // TODO: validator for email validation
     },
 
@@ -26,21 +27,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["student", "lab_assistant", "moderator", "admin"],
       default: "student",
+      index: true, // used for filtering users by role
     },
 
     skills: {
       type: [String],
       default: [],
-      index: true, // for skill-based search/filtering
+      index: true, // used for moderator recommendation
     },
   },
   { timestamps: true }
 );
 
-// TODO: indexing 
-// find user by email/role faster via indexing
-// userSchema.index({ role: 1 });
-// userSchema.index({ email: 1 });
+userSchema.index({ role: 1, skills: 1 })// Often used: find moderator with specific skills
+userSchema.index({ name: "text", email: "text" }); //searching users by name/email (admin search)
 
 const User = mongoose.model("User", userSchema);
 export default User;
