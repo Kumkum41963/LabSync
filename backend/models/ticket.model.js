@@ -107,8 +107,7 @@ ticketSchema.index({ priority: 1, createdAt: -1 });
 // ticketSchema.index({ tags: 1, relatedSkills: 1 });
 
 // // moderator dashboard filtering
-// ticketSchema.index({ assignedModerator: 1, status: 1 });
-
+ticketSchema.index({ assignedModerator: 1, status: 1, priority: 1 });
 
 
 const Ticket = mongoose.model("Ticket", ticketSchema);
