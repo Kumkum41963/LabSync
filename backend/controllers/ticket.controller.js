@@ -7,10 +7,12 @@ export const createTicket = async (req, res) => {
   try {
     const user = req.user;
 
-    // Defensive role check 
+    // Defensive role check
     if (user.role !== "student" && user.role !== "admin") {
       console.warn(`Unauthorized createTicket attempt by ${user.role}`);
-      return res.status(403).json({ message: "Only students can raise tickets" });
+      return res
+        .status(403)
+        .json({ message: "Only students can raise tickets" });
     }
 
     let { title, description, tags } = req.body;
@@ -88,8 +90,22 @@ export const getTickets = async (req, res) => {
     const user = req.user;
     console.log(`Fetching tickets for ${user.name} with (${user.role})`);
 
-    // params query
-    const { search, tag, status, priority } = req.query;
+    // Destructure params query
+    let {
+      search,
+      tag,
+      status,
+      priority,
+      assigned,
+      sort = "createdAt-desc",
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    // Convert page and limit to integers for pagination calculations
+    page = Number.parseInt(page) || 1;
+    limit = Math.min(Number.parseInt(limit) || 10, 100);
+
     const filter = {}; // conditions at which fetching/searching is to be done
 
     // Role-based scoping
@@ -100,10 +116,12 @@ export const getTickets = async (req, res) => {
         break;
 
       case "moderator":
+        // Moderators can only view tickets assigned to them
         filter.assignedModerator = user._id;
         break;
 
       case "student":
+        // Students can only view tickets they created
         filter.createdBy = user._id;
         break;
 
@@ -111,33 +129,54 @@ export const getTickets = async (req, res) => {
         return res.status(403).json({ message: "Access denied" });
     }
 
-    // Params filters
+    // Set params filters that are sent by frontend
     if (tag) filter.tags = { $in: [tag] };
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
-
+    if (assigned === "true") {
+      filter.assignedModerator = { $ne: null };
+    } else if (assigned === "false") {
+      filter.assignedModerator = null;
+    }
     // Text search (title + description)
     if (search) filter.$text = { $search: search };
 
-    console.log("filter chars:", filter)
+    console.log("🔍 Final Filter Object →", filter);
 
-    // Fetch & populate based on filter
+    // Apply sorting options
+    const sortOptions = {};
+    const [sortField, sortDirection] = sort.split("-");
+    sortOptions[sortField] = sortDirection === "asc" ? 1 : -1;
+
+    console.log("⚙️ Sort Options →", sortOptions);
+
+    // Pagination (skip + limit)
+    const skip = (page - 1) * limit;
+
+    // Fetch total count before pagination
+    const totalCount = await Ticket.countDocuments(filter);
+
+    console.log(`📊 Total tickets matching filter are: ${totalCount}`);
+
+    // Fetch paginated result & populate based on filter
     const tickets = await Ticket.find(filter)
       .populate("createdBy", ["name", "email", "_id", "role"])
       .populate("assignedModerator", ["name", "email", "_id"])
       .populate("assignedByLabAssistant", ["name", "email", "_id"])
-      .sort({ createdAt: -1 });
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limit);
 
     // Validate ticket found
     if (!tickets || tickets.length === 0) {
-      return res.status(200).json({
+      return res.status(204).json({
         message: "No tickets found",
         tickets: [],
       });
     }
 
     console.log(
-      `✅ ${tickets.length} tickets fetched for ${user.name}with role ${user.role}`
+      `✅ ${tickets.length} tickets fetched for ${user.name} with role ${user.role}`
     );
 
     console.log("All fetched tickets:", tickets);
@@ -145,6 +184,12 @@ export const getTickets = async (req, res) => {
     return res.status(200).json({
       message: "Tickets fetched successfully 🟢",
       count: tickets.length,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
       tickets,
     });
   } catch (error) {
@@ -164,7 +209,7 @@ export const getTicketById = async (req, res) => {
 
     // Find the ticket and populate related fields
     const ticket = await Ticket.findById(ticketId)
-      .populate("createdBy", ["name", "email", "_id","role"])
+      .populate("createdBy", ["name", "email", "_id", "role"])
       .populate("assignedModerator", ["name", "email", "_id"])
       .populate("assignedByLabAssistant", ["name", "email", "_id"]);
 
@@ -350,7 +395,7 @@ export const assignModerator = async (req, res) => {
     );
 
     // Only lab assistant or admin can assign
-    const allowedRoles = ["lab_assistant", "admin"]
+    const allowedRoles = ["lab_assistant", "admin"];
     if (!allowedRoles.includes(user.role)) {
       return res.status(403).json({ message: "Not authorized ❌" });
     }
