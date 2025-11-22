@@ -99,12 +99,12 @@ export const getTickets = async (req, res) => {
       assigned,
       sort = "createdAt-desc",
       page = 1,
-      limit = 10,
+      limit = 6,
     } = req.query;
 
     // Convert page and limit to integers for pagination calculations
     page = Number.parseInt(page) || 1;
-    limit = Math.min(Number.parseInt(limit) || 10, 100);
+    limit = Math.min(Number.parseInt(limit) || 6, 100);
 
     const filter = {}; // conditions at which fetching/searching is to be done
 
@@ -151,6 +151,7 @@ export const getTickets = async (req, res) => {
     console.log("⚙️ Sort Options →", sortOptions);
 
     // Pagination (skip + limit)
+    // Number of data to skip
     const skip = (page - 1) * limit;
 
     // Fetch total count before pagination
