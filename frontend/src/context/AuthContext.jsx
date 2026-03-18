@@ -1,111 +1,80 @@
 import { useEffect, useState, useContext, createContext } from "react";
-import axios from "axios";
+import { storage } from "@/services/storage";
+import { api } from "@/services/api";
 
 // Create global auth context
 const AuthContext = createContext(null);
 
 // Provider component wrapping the entire app
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem("user");
-      return stored && stored !== "undefined" ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
-  const [authToken, setAuthToken] = useState(localStorage.getItem("token"));
+
+  // Store the current user in state if exists already
+  const [currentUser, setCurrentUser] = useState(storage.getUser());
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
-  const API = import.meta.env.VITE_BASE_URL;
+  const saveSession = (data) => {
+    console.log("[Auth] Saving session", data);
+    storage.setToken(data.token);
+    storage.setRole(data.role);
+    storage.setUser(data.user);
+    setCurrentUser(data.user);
+  };
 
+  const clearSession = () => {
+    console.log("[Auth] Clearing session");
+    storage.clearSession();
+    setCurrentUser(null);
+  };
 
-  // Fetch user whenever so token changes
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!authToken) {
-        setCurrentUser(null);
-        setIsLoadingAuth(false);
-        return; // Exit fxn early if no logged-in user
-      }
-
-      try {
-        const res = await axios.get(`${API}/auth/current-user`, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-        setCurrentUser(res.data.user);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-      } catch (err) {
-        console.error("Token validation failed:", err.message);
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setCurrentUser(null);
-      } finally {
-        // Stop showing loading spinner whether request succeeded or failed
-        setIsLoadingAuth(false);
-      }
-    };
-
-    fetchUserProfile();
-  }, [authToken]);
-
-  // handle login + store token n user
-  const handleLogin = async (credentials) => {
+  // handle login + store token in user
+  const handleLogin = async (formData) => {
+    setIsLoadingAuth(true)
     try {
-      const res = await axios.post(`${API}/auth/login`, credentials);
-      console.log('res from server back too client after login:', res)
-      const { token, user } = res.data;
-      console.log("token:", token);
-      console.log("user:", user);
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      setAuthToken(token);
-      setCurrentUser(user);
-
-      console.log("successful login");
-      console.log('actual stored user:', currentUser)
-      console.log('token:', token)
-      console.log('currentUser:', user)
-
-      return user;
+      console.log("[Auth] Login start", formData);
+      const res = await api.auth.login(formData);
+      saveSession(res.data);
+      console.log("[Auth] Login success", res.data);
     } catch (err) {
+      if(err.respone) {
+        const {status }= err.response
+        if(status === 400 || status === 401) {
+          alert("Invalid Credentials")
+        }
+      }
       console.error("Login failed:", err.message);
       throw new Error(err.response?.data?.message || "Login failed");
+    } finally {
+      setIsLoadingAuth(false)
     }
   };
 
   // handle signup + store token n user
-  const handleSignup = async (credentials) => {
+  const handleSignup = async (formData) => {
+    setIsLoadingAuth(true)
     try {
-      const res = await axios.post(`${API}/auth/signup`, credentials);
-      const { token, user } = res.data;
-      console.log("token:", token);
-      console.log("user:", user);
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      setAuthToken(token);
-      setCurrentUser(user);
-
-      console.log("successful signup");
-      console.log('token:', token)
-      console.log('currentUser:', user)
-
-      return user;
+      console.log("[Auth] Login start", formData);
+      const res = await api.auth.signup(formData);
+      saveSession(res.data);
+      console.log("[Auth] Signup success", res.data);
     } catch (err) {
       console.error("Signup failed:", err.message);
       throw new Error(err.response?.data?.message || "Signup failed");
+    } finally {
+      setIsLoadingAuth(false)
     }
   };
 
   // Clear local storage and logout
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setAuthToken(null);
-    setCurrentUser(null);
+  const handleLogout = async () => {
+    try {
+      console.log("[Auth] Logout start");
+    await api.auth.logout();
+    clearSession();
+    console.log("[Auth] Logout success");
+    } catch (error) {
+       console.error("Logout failed:", err.message);
+      throw new Error(err.response?.data?.message || "Logout failed");
+    }
   };
 
   return (
@@ -114,7 +83,6 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         currentUser,
-        authToken,
         isLoadingAuth,
         handleLogin,
         handleLogout,

@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
+// Get the type of form (login/signup) from props
 const AuthForm = ({ type }) => {
   const navigate = useNavigate();
   const { handleLogin, handleSignup } = useAuth();
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
@@ -23,7 +24,8 @@ const AuthForm = ({ type }) => {
 
   // Handle input changes
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    // chnage or append the form data or state to state -> form (literally)
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   // Handle form submission
@@ -34,19 +36,16 @@ const AuthForm = ({ type }) => {
     try {
       if (isLogin) {
         // send an object to server for destructuring
-        await handleLogin({
-          email: form.email,
-          password: form.password,
-          role: form.role,
-        });
-        navigate("/");
+        // form has got the data from the unput fields
+        await handleLogin(formData);
+        navigate("/"); // redirect to home/dashboard after login
       } else {
-        await handleSignup(form);
+        // sent the entire form data 
+        await handleSignup(formData);
         navigate("/");
       }
     } catch (error) {
       console.error(`${isLogin ? "Login" : "Signup"} failed:`, error);
-      alert(error.response?.data?.message || "Something went wrong!");
     } finally {
       setLoading(false);
     }
@@ -61,37 +60,33 @@ const AuthForm = ({ type }) => {
   ];
 
   return (
-    <div className="flex items-center justify-center w-full h-full px-6 py-12 bg-[#0b1120]">
-      <Card className="w-full max-w-md bg-[#111827]/80 border border-cyan-500/40 shadow-[0_0_40px_-10px_rgba(56,189,248,0.4)] backdrop-blur-md rounded-2xl text-white">
-        <CardContent className="p-8 ">
-          {/* heading */}
-          <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
+    <div className="auth-page">
+      <Card className="auth-card text-white">
+        <CardContent className="p-8">
+          <h2 className="auth-heading">
             {isLogin ? "Login" : "Sign Up"}
           </h2>
 
-          {/* form holders and labels */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name */}
             {!isLogin && (
               <div>
-                <Label htmlFor="name" className="text-gray-300 mb-1 ml-1">
+                <Label htmlFor="name" className="auth-label">
                   Name
                 </Label>
                 <Input
                   id="name"
                   name="name"
                   placeholder="eg. admin"
-                  value={form.name}
+                  value={formData.name}
                   onChange={handleChange}
-                  className="bg-[#0f172a] border border-cyan-500/50 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-400"
+                  className="auth-input"
                   required
                 />
               </div>
             )}
 
-            {/* Email */}
             <div>
-              <Label htmlFor="email" className="text-gray-300 mb-1 ml-1">
+              <Label htmlFor="email" className="auth-label">
                 Email
               </Label>
               <Input
@@ -99,16 +94,15 @@ const AuthForm = ({ type }) => {
                 name="email"
                 type="email"
                 placeholder="eg. admin@gmail.com"
-                value={form.email}
+                value={formData.email}
                 onChange={handleChange}
-                className="bg-[#0f172a] border border-cyan-500/50 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-400"
+                className="auth-input"
                 required
               />
             </div>
 
-            {/* Pwd */}
             <div>
-              <Label htmlFor="password" className="text-gray-300 mb-1 ml-1">
+              <Label htmlFor="password" className="auth-label">
                 Password
               </Label>
               <Input
@@ -116,25 +110,23 @@ const AuthForm = ({ type }) => {
                 name="password"
                 type="password"
                 placeholder="eg. admin@123"
-                value={form.password}
+                value={formData.password}
                 onChange={handleChange}
-                className="bg-[#0f172a] border border-cyan-500/50 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-400"
+                className="auth-input"
                 required
               />
             </div>
 
-            {/* Role */}
-
             <div>
-              <Label htmlFor="role" className="text-gray-300 ml-1">
+              <Label htmlFor="role" className="auth-label">
                 Role
               </Label>
               <select
                 id="role"
                 name="role"
-                value={form.role}
+                value={formData.role}
                 onChange={handleChange}
-                className="w-full mt-1 bg-[#0f172a] border border-cyan-500/50 text-white rounded-md py-2 px-3 focus:ring-2 focus:ring-cyan-400 outline-none"
+                className="auth-select"
                 required
               >
                 <option value="" disabled>
@@ -148,12 +140,7 @@ const AuthForm = ({ type }) => {
               </select>
             </div>
 
-            {/* Submit Btn */}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-pink-500 hover:to-cyan-400 text-white font-semibold py-2 mt-4 transition-all duration-300 shadow-lg hover:shadow-pink-500/30"
-            >
+            <Button type="submit" disabled={loading} className="auth-btn">
               {loading
                 ? isLogin
                   ? "Logging in..."
@@ -164,11 +151,11 @@ const AuthForm = ({ type }) => {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-400">
+          <p className="auth-link-text">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <Link
               to={isLogin ? "/signup" : "/login"}
-              className="text-cyan-300 hover:underline font-medium"
+              className="auth-link"
             >
               {isLogin ? "Sign up" : "Login"}
             </Link>

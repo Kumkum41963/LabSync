@@ -15,14 +15,14 @@ export const signup = async (req, res, next) => {
   try {
     const { name, email, password, skills = [], role } = req.body;
 
-    // 1️⃣ Validate required fields
+    // Validate required fields
     if (!name || !email || !password) {
       return res
         .status(400)
         .json({ message: "Name, Email & Password are required" });
     }
 
-    // 2️⃣ Check if email already exists
+    // Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
@@ -30,12 +30,12 @@ export const signup = async (req, res, next) => {
         .json({ message: "User already exists. Kindly login." });
     }
 
-    // 3️⃣ Hash password for security
+    // Hash password for security
     const hashedPassword = await bcrypt.hash(password, 10);
 
     console.log("user creating!!!");
 
-    // 4️⃣ Create user
+    // Create user
     const user = await User.create({
       name,
       email,
@@ -59,7 +59,7 @@ export const signup = async (req, res, next) => {
       console.log("inngestRes error from signup controller", error);
     }
 
-    // 5️⃣ Create JWT Token
+    // Create JWT Token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -68,9 +68,9 @@ export const signup = async (req, res, next) => {
 
     console.log("signup successful!!!");
 
-    // 6️⃣ Send success response
+    // Send success response
     //  NOTE: user and token these keywords must be consistent across the backend and frontend
-    res.status(201).json({
+    return res.status(201).json({
       message: "User registered successfully",
       user: {
         id: user._id,
@@ -100,22 +100,30 @@ export const login = async (req, res) => {
     console.log('req body', req.body)
     const { email, password } = req.body;
 
-    // 1️⃣ Validate input
-    if (!email || !password)
+    // Validate input
+    if (!email || !password) {
       return res
         .status(400)
         .json({ message: "Email and Password are required" });
+    }
 
-    // 2️⃣ Find user
+    // Find user
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
 
-    // 3️⃣ Compare passwords
+    // Match the role
+    if (user.role !== req.body.role) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    // 4️⃣ Generate JWT token
+    // Generate JWT token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -124,14 +132,15 @@ export const login = async (req, res) => {
 
     console.log('login successfull!!!')
 
-    // 5️⃣ Return response
-    res.status(200).json({
+    // Return response
+    return res.status(200).json({
       message: "Login successful",
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        skills: user.skills
       },
       token,
     });

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Navbar from "@/components/layout/Navbar";
 import Sidebar from "@/components/layout/Sidebar";
 
 const Layout = () => {
@@ -13,8 +12,8 @@ const Layout = () => {
 
       {/* Main Content Area */}
       <div className="flex flex-col flex-1">
-        <Navbar />
-        <main className="flex-1 overflow-y-auto p-6 bg-[#0f172a] dark:bg-[#0b1120] pt-20">
+        {/* <Navbar /> */}
+        <main className="flex-1 overflow-y-auto bg-[#acbeea] dark:bg-[#4c68b2] ">
           <Outlet />
         </main>
       </div>

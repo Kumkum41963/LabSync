@@ -1,8 +1,21 @@
 import AppRoutes from "@/utils/AppRoutes";
+import { AuthProvider } from "./context/AuthContext";
+import { RoleProvider } from "./context/RoleContext";
+import { TicketsProvider } from "./context/TicketsContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
-// Entry point - wraps everything inside AuthProvider
 const App = () => {
-  return <AppRoutes />;
+  return (
+    <AuthProvider>
+      <ThemeProvider>
+        <RoleProvider>
+          <TicketsProvider>
+            <AppRoutes />
+          </TicketsProvider>
+        </RoleProvider>
+      </ThemeProvider>
+    </AuthProvider>
+  );
 };
 
 export default App;

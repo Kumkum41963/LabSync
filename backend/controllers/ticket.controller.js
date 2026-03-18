@@ -2,7 +2,7 @@ import { inngest } from "../inngest/client.js";
 import Ticket from "../models/ticket.model.js";
 import User from "../models/user.model.js";
 
-// 🆕 createTicket: Student or Admin raises a new ticket
+// createTicket: Student or Admin raises a new ticket
 export const createTicket = async (req, res) => {
   try {
     const user = req.user;
@@ -54,7 +54,7 @@ export const createTicket = async (req, res) => {
       createdBy: req.user._id.toString(),
     });
 
-    console.log("✅ Ticket created in DB:", newTicket);
+    console.log("Ticket created in DB:", newTicket);
 
     // Send event to Inngest for background AI processing
     try {
@@ -84,7 +84,7 @@ export const createTicket = async (req, res) => {
   }
 };
 
-// 📋 getTickets: Role-aware unified fetch for Admin, Lab Assistant, Moderator, and Student
+// getTickets: Role-aware unified fetch for Admin, Lab Assistant, Moderator, and Student
 export const getTickets = async (req, res) => {
   try {
     const user = req.user;
@@ -199,7 +199,7 @@ export const getTickets = async (req, res) => {
   }
 };
 
-// 🔍 getTicketById: View full ticket details
+// getTicketById: View full ticket details
 export const getTicketById = async (req, res) => {
   try {
     const user = req.user;
@@ -247,7 +247,7 @@ export const getTicketById = async (req, res) => {
   }
 };
 
-// 🔄 updateTicketById: Role-based update (Student, Moderator, Lab Assistant, Admin)
+// updateTicketById: Role-based update (Student, Moderator, Lab Assistant, Admin)
 export const updateTicketById = async (req, res) => {
   try {
     const user = req.user;
@@ -348,7 +348,7 @@ export const updateTicketById = async (req, res) => {
   }
 };
 
-// 🗑️ deleteTicket: Admin deletes a ticket if necessary and student deletes their own ticket
+// deleteTicket: Admin deletes a ticket if necessary and student deletes their own ticket
 export const deleteTicketById = async (req, res) => {
   try {
     const user = req.user;
@@ -384,7 +384,7 @@ export const deleteTicketById = async (req, res) => {
   }
 };
 
-// 🧑‍🏫 assignModerator: Lab Assistant assigns a moderator to a ticket
+// assignModerator: Lab Assistant assigns a moderator to a ticket
 export const assignModerator = async (req, res) => {
   try {
     const { id } = req.params; // ticket id
@@ -436,6 +436,6 @@ export const assignModerator = async (req, res) => {
   }
 };
 
-// 📊 getDashboardStats: Show ticket counts by status, priority, or tag
+// getDashboardStats: Show ticket counts by status, priority, or tag
 
-// ✅ closeTicket: Student confirms issue resolved (marks ticket closed)
+// closeTicket: Student confirms issue resolved (marks ticket closed)

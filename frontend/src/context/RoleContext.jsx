@@ -1,35 +1,35 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
 import { useAuth } from "@/context/AuthContext"
-import { ROLE_PERMISSIONS } from "@/utils/rolePermissions"
+import { storage } from "@/services/storage"
 
 const RoleContext = createContext()
 
 export const RoleProvider = ({ children }) => {
 
     const { currentUser } = useAuth()
-    const [role, setRole] = useState(null)
-    const [permissions, setPermissions] = useState({})
+    const [role, setRole] = useState(storage.getRole())
 
     // Mount the role everytime page loads (user changes: login, logout, signup)
     useEffect(() => {
         if (!currentUser) {
             setRole(null)
-            setPermissions({})
         } else {
-            const userRole = currentUser.role || "student"
-            setRole(userRole)
-            setPermissions(ROLE_PERMISSIONS[userRole] || {})
+            setRole(storage.getRole())
         }
     }, [currentUser])
 
-    // Helper to check if the current role has a given permission
-    const hasPermission = (permissionKey) => {
-        if (!permissions) return false;
-        return permissions[permissionKey] || false
+    const updateRole = (newRole) => {
+        setRole(newRole)
+        storage.setRole(newRole)
+    }
+
+    const hasRole = (allowedRoles = []) => {
+        const res = allowedRoles.includes(role)
+        return res
     }
 
     return (
-        <RoleContext.Provider value={{ role, permissions, hasPermission }}>
+        <RoleContext.Provider value={{ role, updateRole, hasRole }}>
             {children}
         </RoleContext.Provider>
     )
