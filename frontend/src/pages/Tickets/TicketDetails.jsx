@@ -1,134 +1,149 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useTickets } from "@/context/TicketsContext";
-import BackButton from "@/components/tickets/BackButton";
-import TicketTags from "@/components/tickets/TicketTags";
-import TicketInfoGrid from "@/components/tickets/TicketInfoGrid";
-import TicketSection from "@/components/tickets/TicketSection";
-import ActionButton from "@/components/tickets/ActionButton";
+import { ArrowLeft, Sparkles, User, Clock, Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-const TicketDetails = () => {
-  const { id } = useParams();
-  const { getTicketById } = useTickets();
-  const [ticket, setTicket] = useState(null);
-
-  // ✅ Fetch ticket when component mounts or id changes
-  useEffect(() => {
-    const fetchTicket = async () => {
-      const data = await getTicketById(id);
-      setTicket(data);
-    };
-    fetchTicket();
-  }, [id, getTicketById]);
-
-  if (!ticket)
-    return (
-      <div className="flex items-center justify-center h-screen text-gray-400">
-        Loading ticket...
-      </div>
-    );
-
+export default function TicketDetails({ ticket, onBack, onGenerateAI }) {
   return (
-    <div className="min-h-screen bg-[#0a0f14] text-gray-200 px-4 sm:px-6 md:px-10 py-6">
-      {/* 🔙 Back Button */}
-      <div className="mb-6">
-        <BackButton label="Back to Tickets" />
+    <div className="min-h-screen bg-[#0d1117] text-white p-4 sm:p-6 md:p-10">
+      {/* Back + Title */}
+      <div className="flex items-start gap-4 mb-8">
+        <button
+          onClick={onBack}
+          className="p-2 hover:bg-white/5 rounded-lg transition"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-semibold">
+            {ticket.title}
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Ticket ID: {ticket.id}
+          </p>
+        </div>
       </div>
 
-      {/* 🎟️ Ticket Container */}
-      <div
-        className="
-          bg-[#0d1117] border border-slate-800 rounded-2xl 
-          shadow-lg shadow-cyan-900/30 
-          max-w-6xl mx-auto p-6 sm:p-8
-        "
-      >
-        {/* ---- Header Section ---- */}
-        <header className="mb-6 border-b border-slate-700 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1
-              className="
-                text-2xl sm:text-3xl font-semibold tracking-tight
-                bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500
-                bg-clip-text text-transparent
-              "
-            >
-              {ticket.title}
-            </h1>
+      {/* Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* LEFT SIDE */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Description Card */}
+          <div className="bg-[#11161c] border border-white/10 rounded-xl p-6">
+            <h2 className="text-lg font-semibold mb-4">Description</h2>
+            <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+              {ticket.description}
+            </p>
+          </div>
 
-            {/* ---- Tags ---- */}
-            <div className="mt-2 border-t border-slate-800 pt-1">
-              {ticket.tags?.length > 0 ? (
-                <TicketTags tags={ticket.tags} />
-              ) : (
-                <p className="text-gray-500 italic">No tags assigned.</p>
-              )}
+          {/* AI Analysis Card */}
+          <div className="bg-[#11161c] border border-white/10 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-lg font-semibold">AI Analysis</h2>
+              </div>
+
+              <Button
+                onClick={onGenerateAI}
+                className="bg-cyan-600 hover:bg-cyan-500 text-white"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate Analysis
+              </Button>
+            </div>
+
+            <div className="flex flex-col items-center justify-center py-12 text-center text-gray-400">
+              <Sparkles className="w-10 h-10 mb-4 opacity-40" />
+              <p className="max-w-md">
+                Click <span className="text-white font-medium">"Generate Analysis"</span> to get an AI-powered analysis of this ticket including root cause analysis, impact assessment, and recommended resolution steps.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="space-y-6">
+          {/* Details Card */}
+          <div className="bg-[#11161c] border border-white/10 rounded-xl p-6">
+            <h2 className="text-lg font-semibold mb-6">Details</h2>
+
+            <div className="space-y-5">
+              <DetailRow
+                label="Status"
+                value={
+                  <Badge className="bg-blue-600/20 text-blue-400 border-blue-500/30">
+                    {ticket.status}
+                  </Badge>
+                }
+              />
+
+              <DetailRow
+                label="Priority"
+                value={
+                  <Badge className="bg-red-600/20 text-red-400 border-red-500/30">
+                    {ticket.priority}
+                  </Badge>
+                }
+              />
+
+              <DetailRow
+                icon={<User className="w-4 h-4" />}
+                label="Assigned To"
+                value={ticket.assignedTo || "Unassigned"}
+              />
+
+              <DetailRow
+                icon={<User className="w-4 h-4" />}
+                label="Created By"
+                value={ticket.createdBy}
+              />
+
+              <DetailRow
+                icon={<Clock className="w-4 h-4" />}
+                label="Created"
+                value={new Date(ticket.createdAt).toLocaleDateString()}
+              />
             </div>
           </div>
 
-          {/* ✏️🗑️ Edit / Delete Buttons */}
-          <div className="mt-4 sm:mt-0 flex justify-start sm:justify-end">
-            <ActionButton ticketId={ticket._id} />
+          {/* Tags Card */}
+          <div className="bg-[#11161c] border border-white/10 rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Tag className="w-4 h-4" />
+              <h2 className="text-lg font-semibold">Tags</h2>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {ticket.tags?.length ? (
+                ticket.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-3 py-1 text-sm rounded-full bg-cyan-600/20 text-cyan-400 border border-cyan-500/30"
+                  >
+                    {tag}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm text-gray-500">No tags</span>
+              )}
+            </div>
           </div>
-        </header>
-
-        {/* ---- Info Grid Section ---- */}
-        <TicketInfoGrid
-          status={ticket.status}
-          priority={ticket.priority}
-          createdBy={ticket.createdBy}
-          assignedTo={ticket.assignedModerator}
-          assignedBy={ticket.assignedByLabAssistant}
-        />
-
-        {/* ---- Description + AI Summary in Grid ---- */}
-        <div
-          className="
-            mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 
-          "
-        >
-          <TicketSection title="Description">
-            {ticket.description ? (
-              <p>{ticket.description}</p>
-            ) : (
-              <p className="text-gray-500 italic">No description provided.</p>
-            )}
-          </TicketSection>
-
-          <TicketSection title="AI Summary">
-            {ticket.aiSummary ? (
-              <p>{ticket.aiSummary}</p>
-            ) : (
-              <p className="text-gray-500 italic">No AI summary available.</p>
-            )}
-          </TicketSection>
-        </div>
-
-        {/* ---- Meta Info ---- */}
-        <div
-          className="
-            mt-8 border-t border-dotted border-slate-700 pt-4 
-            flex flex-wrap justify-between text-xs sm:text-sm text-gray-400
-          "
-        >
-          <p>
-            <span className="text-gray-500">Created at: </span>
-            {new Date(ticket.createdAt).toLocaleString("en-GB")}
-          </p>
-          <p>
-            <span className="text-gray-500">Updated at: </span>
-            {new Date(ticket.updatedAt).toLocaleString("en-GB")}
-          </p>
-          {ticket.closedAt && (
-            <p>
-              <span className="text-gray-500">Closed at: </span>
-              {new Date(ticket.closedAt).toLocaleString("en-GB")}
-            </p>
-          )}
         </div>
       </div>
     </div>
   );
-};
+}
 
-export default TicketDetails;
+/* Reusable Row */
+function DetailRow({ icon, label, value }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-2 text-gray-400">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <div className="text-right font-medium">{value}</div>
+    </div>
+  );
+}

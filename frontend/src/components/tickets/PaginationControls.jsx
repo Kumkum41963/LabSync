@@ -26,4 +26,4 @@ const PaginationControls = ({ page, totalPages, onChange }) => {
   );
 };
 
-export default PaginationControls;
+export default  PaginationControls;

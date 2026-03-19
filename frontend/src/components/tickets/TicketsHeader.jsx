@@ -1,77 +1,90 @@
-import React from "react";
-import SearchBar from "@/components/tickets/SearchBar";
-import FilterDropdown from "@/components/tickets/FilterDropdown";
-import SortDropdown from "@/components/tickets/SortDropdown";
+import { Search, Filter } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const TicketsHeader = ({ params, setParams }) => {
+export default function TicketsHeader({ params, setParams }) {
   return (
-    <div className="w-full bg-[#06404b37] p-4 rounded-lg mb-6 flex flex-col gap-4">{/* Peacock/Turquoise background */}
-
-      {/* 🔍 Search */}
-      <div className="relative w-full">
-        <SearchBar
+    <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+      {/* Search */}
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search tickets..."
           value={params.search}
-          onChange={(value) => setParams((p) => ({ ...p, search: value, page: 1 }))}
-          className="pl-20" // extra padding for icon
-        />
-      </div>
-
-      {/* 🧩 Filters (Status / Priority / Tag / Assigned) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-        <FilterDropdown
-          label="Status"
-          value={params.status}
-          options={["open", "in_progress", "resolved", "closed"]}
-          onChange={(value) => setParams((p) => ({ ...p, status: value, page: 1 }))}
-        />
-
-        <FilterDropdown
-          label="Priority"
-          value={params.priority}
-          options={["low", "medium", "high"]}
-          onChange={(value) => setParams((p) => ({ ...p, priority: value, page: 1 }))}
-        />
-
-        <FilterDropdown
-          label="Assigned"
-          value={params.assigned}
-          options={[
-            { value: "true", label: "Assigned" },
-            { value: "false", label: "Not Assigned" },
-          ]}
-          onChange={(value) =>
-            setParams((p) => ({ ...p, assigned: value, page: 1 }))
+          onChange={(e) =>
+            setParams((prev) => ({
+              ...prev,
+              search: e.target.value,
+              page: 1,
+            }))
           }
-        />
-
-        <FilterDropdown
-          label="Tag"
-          value={params.tag}
-          options={[]}
-          onChange={(value) => setParams((p) => ({ ...p, tag: value, page: 1 }))}
+          className="pl-9"
         />
       </div>
 
-      {/* ❌ Reset */}
-      <button
-        onClick={() =>
-          setParams({
-            search: "",
-            status: "",
-            priority: "",
-            tag: "",
-            assigned: "",
-            sort: "createdAt-desc",
-            page: 1,
-            limit: 6,
-          })
-        }
-        className="bg-[#0fa4a3] hover:bg-[#0c8b8a] text-white py-2 px-3 rounded-md text-sm self-start"
-      >
-        Reset Filters
-      </button>
+      {/* Filters Row */}
+      <div className="flex flex-wrap gap-3">
+        {/* Status */}
+        <Select
+          value={params.status}
+          onValueChange={(value) =>
+            setParams((prev) => ({ ...prev, status: value, page: 1 }))
+          }
+        >
+          <SelectTrigger className="w-[160px]">
+            <Filter className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="open">Open</SelectItem>
+            <SelectItem value="in-progress">In Progress</SelectItem>
+            <SelectItem value="closed">Closed</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Priority */}
+        <Select
+          value={params.priority}
+          onValueChange={(value) =>
+            setParams((prev) => ({ ...prev, priority: value, page: 1 }))
+          }
+        >
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Priority</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Sort */}
+        <Select
+          value={params.sort}
+          onValueChange={(value) =>
+            setParams((prev) => ({ ...prev, sort: value }))
+          }
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="createdAt-desc">Newest First</SelectItem>
+            <SelectItem value="createdAt-asc">Oldest First</SelectItem>
+            <SelectItem value="priority-desc">Priority High → Low</SelectItem>
+            <SelectItem value="priority-asc">Priority Low → High</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
-};
-
-export default TicketsHeader;
+}

@@ -55,7 +55,7 @@ const AuthForm = ({ type }) => {
   const roles = [
     { value: "student", label: "Student" },
     { value: "moderator", label: "Moderator" },
-    { value: "lab assistant", label: "Lab Assistant" },
+    { value: "lab_assistant", label: "Lab Assistant" },
     { value: "admin", label: "Admin" },
   ];
 
