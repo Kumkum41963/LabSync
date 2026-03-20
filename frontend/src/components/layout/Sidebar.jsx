@@ -1,18 +1,10 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  Bell,
-  FileText,
-  Settings,
-  Ticket,
-  Shield,
-  LogOut,
-  Home,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Bell, Settings, Ticket, Shield, LogOut, Home, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const { currentUser, handleLogout } = useAuth();
@@ -31,85 +23,76 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
   }
 
   return (
-    <aside
-      className={`h-screen bg-[#0b1120] border-r border-cyan-500/30 flex flex-col transition-all duration-300
-        ${collapsed ? "w-20" : "w-64"} fixed md:relative z-50`}
-    >
-      {/* Logo & Collapse Toggle */}
-      <div className="flex items-center justify-between px-4 py-5 border-b border-cyan-500/30">
-        <div
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 cursor-pointer"
-        >
-          {/* <img
-            src="/logo192.png"
-            alt="LabSync"
-            className="w-8 h-8 object-contain"
-          /> */}
-          {!collapsed && (
-            <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
-              LabSync
-            </h1>
-          )}
-        </div>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-2 rounded-md hover:bg-cyan-500/10"
-        >
-          {collapsed ? (
-            <ChevronRight className="w-5 h-5 text-cyan-400" />
-          ) : (
-            <ChevronLeft className="w-5 h-5 text-cyan-400" />
-          )}
-        </button>
-      </div>
-
-      {/* Navigation Menu */}
-      <nav className="flex-1 flex flex-col mt-4 gap-2 px-3">
-        {menuItems.map(({ label, path, icon: Icon }) => (
-          <div key={label} className="relative group">
-            <button
-              onClick={() => navigate(path)}
-              className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-cyan-500/10 transition
-              ${location.pathname === path ? "bg-cyan-500/20 text-cyan-400" : ""}`}
-            >
-              <Icon className="w-5 h-5 shrink-0" />
-              {!collapsed && <span>{label}</span>}
-            </button>
-
-            {/* Tooltip on hover in collapsed mode */}
-            {collapsed && (
-              <span
-                className="absolute left-16 top-1/2 -translate-y-1/2 bg-[#1e293b] text-white text-sm px-2 py-1 rounded-md 
-                opacity-0 pointer-events-none group-hover:opacity-100 transition whitespace-nowrap shadow-lg border border-cyan-500/30"
-              >
-                {label}
-              </span>
-            )}
-          </div>
-        ))}
-      </nav>
-
-      {/* Logout Section */}
-      <div className="border-t border-cyan-500/30 p-4">
-        {currentUser && !collapsed && (
-          <div className="mb-3 text-sm text-gray-400">
-            <p className="font-semibold text-cyan-400">Welcome, {currentUser.name}</p>
-            <p className="text-xs">{currentUser.email}</p>
-          </div>
+    <TooltipProvider delayDuration={0}>
+      <aside
+        className={cn(
+          "h-screen bg-card border-r border-border flex flex-col transition-all duration-300 z-50 sticky top-0",
+          collapsed ? "w-[80px]" : "w-[260px]"
         )}
-        <Button
-          onClick={handleLogout}
-          variant="outline"
-          className="w-full border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          {!collapsed && "Logout"}
-        </Button>
-      </div>
-    </aside>
+      >
+        {/* Header */}
+        <div className="h-[70px] flex items-center justify-between px-4 border-b border-border">
+          {!collapsed && (
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent ml-2">
+              LabSync
+            </span>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCollapsed(!collapsed)}
+            className={cn("hover:bg-primary/10", collapsed && "mx-auto")}
+          >
+            {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+          </Button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-3 space-y-2 mt-2">
+          {menuItems.map(({ label, path, icon: Icon }) => {
+            const isActive = location.pathname === path;
+            return (
+              <Tooltip key={label} substitute={!collapsed}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={cn(
+                      "w-full justify-start gap-4 h-11 px-3 transition-all",
+                      isActive ? "bg-primary/15 text-primary hover:bg-primary/20" : "text-muted-foreground",
+                      collapsed && "justify-center px-0"
+                    )}
+                    onClick={() => navigate(path)}
+                  >
+                    <Icon className={cn("w-5 h-5 shrink-0", isActive && "text-primary")} />
+                    {!collapsed && <span className="font-medium">{label}</span>}
+                  </Button>
+                </TooltipTrigger>
+                {collapsed && <TooltipContent side="right">{label}</TooltipContent>}
+              </Tooltip>
+            );
+          })}
+        </nav>
+
+        {/* Footer / User Profile */}
+        <div className="p-4 border-t border-border bg-muted/20">
+          {!collapsed && currentUser && (
+            <div className="mb-4 px-2">
+              <p className="text-sm font-semibold truncate text-foreground">{currentUser.name}</p>
+              <p className="text-xs text-muted-foreground truncate">{currentUser.role.replace('_', ' ')}</p>
+            </div>
+          )}
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className={cn("w-full border-primary/20 text-primary hover:bg-primary/10", collapsed && "px-0")}
+          >
+            <LogOut className={cn("w-4 h-4", !collapsed && "mr-2")} />
+            {!collapsed && "Logout"}
+          </Button>
+        </div>
+      </aside>
+    </TooltipProvider>
   );
 };
 
 export default Sidebar;
-

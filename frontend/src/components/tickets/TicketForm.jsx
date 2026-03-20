@@ -3,35 +3,41 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
-export default function TicketForm({
-  initialValues,
-  onSubmit,
-  submitLabel = "Submit",
-  loading = false,
-}) {
+export default function TicketForm({ onSubmit, submitLabel = "Submit", loading = false, initialData }) {
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    status: "open",
-    priority: "medium",
-    tags: "",
+    title: initialData?.title || "",
+    description: initialData?.description || "",
   });
 
+  // set the form state on very initial mount in case of updates
   useEffect(() => {
-    if (initialValues) setForm((p) => ({ ...p, ...initialValues }));
-  }, [initialValues]);
+    if (initialData) {
+      setForm({
+        title: initialData.title || "",
+        description: initialData.description || "",
+      });
+    }
+  }, [initialData]);
 
-  const setField = (key, value) => {
-    setForm((p) => ({ ...p, [key]: value }));
-  };
+  // Pass or submit the form data 
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      await onSubmit(form) // literally passes thr form to handleCreate (for truly that what onSubmit is)
+      if (!initialData) {
+        setForm({ title: "", description: "" });
+      }
+    } catch (error) {
+      console.error("Form submission failed, keeping data:", error);
+    }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit?.({
-      ...form,
-      tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
-    });
-  };
+  }
+
+  // When input changes also update the form state
+  const handleChange = async (e) => {
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -39,8 +45,9 @@ export default function TicketForm({
       <div className="space-y-2">
         <label className="text-sm font-medium">Title</label>
         <Input
+          name="title" // a key indicator
           value={form.title}
-          onChange={(e) => setField("title", e.target.value)}
+          onChange={handleChange}
           placeholder="Short ticket title"
           required
         />
@@ -50,9 +57,10 @@ export default function TicketForm({
       <div className="space-y-2">
         <label className="text-sm font-medium">Description</label>
         <Textarea
+          name="description" // a key indicator
           rows={5}
           value={form.description}
-          onChange={(e) => setField("description", e.target.value)}
+          onChange={handleChange}
           placeholder="Describe the issue..."
           required
         />
@@ -60,7 +68,7 @@ export default function TicketForm({
 
       {/* Submit */}
       <Button type="submit" disabled={loading}>
-        {loading ? "Please wait..." : submitLabel}
+        {loading ? "Creating Ticket..." : submitLabel}
       </Button>
     </form>
   );

@@ -36,9 +36,9 @@ const AuthSidebar = ({ title = "Welcome to Labsync", subtitle }) => {
           className="
             text-5xl font-extrabold tracking-tight
             bg-gradient-to-r
-            from-cyan-400 via-fuchsia-500 to-purple-500
+            from-primary via-secondary to-secondary/80
             bg-clip-text text-transparent
-            drop-shadow-[0_0_25px_rgba(168,85,247,0.35)]
+            drop-shadow-[0_0_25px_rgba(128,94,255,0.35)]
           "
         >
           {title}

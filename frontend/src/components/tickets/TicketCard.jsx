@@ -5,11 +5,7 @@ import TicketMetaRow from "./TicketMetaRow";
 const TicketCard = ({ ticket }) => {
   return (
     <div
-      className="
-        border border-border rounded-xl p-5
-        bg-background hover-elevate
-        transition-all
-      "
+      className="glass-card border-border rounded-2xl p-5 hover:scale-[1.01] transition-transform duration-300"
     >
       {/* Row 1 */}
       <TicketHeader ticket={ticket} />

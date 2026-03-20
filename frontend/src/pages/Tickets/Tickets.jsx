@@ -4,6 +4,7 @@ import TicketList from "@/components/tickets/TicketList";
 import RaiseTicketButton from "@/components/tickets/RaiseTicketButton";
 import TicketsHeader from "@/components/tickets/TicketsHeader";
 import PaginationControls from "@/components/tickets/PaginationControls";
+import { useRole } from "@/context/RoleContext";
 
 const Tickets = () => {
   const { tickets, getTickets, pagination } = useTickets();
@@ -19,8 +20,9 @@ const Tickets = () => {
     limit: 5,
   });
 
+  // on every mount set the tickets paras
   useEffect(() => {
-    getTickets(params);
+    getTickets(params); // return tickets with matching params
   }, [params]);
 
   return (
@@ -34,13 +36,16 @@ const Tickets = () => {
           </p>
         </div>
 
+        {/* Create Ticket */}
         <RaiseTicketButton />
       </div>
 
       {/* Filters + List */}
-      <div className="bg-card border border-border rounded-xl shadow-sm p-5 space-y-6">
+      <div className="glass-panel bg-card border border-border rounded-xl shadow-sm p-5 space-y-6">
+        {/* Search and Filter */}
         <TicketsHeader params={params} setParams={setParams} />
 
+        {/* All Tickets */}
         <TicketList tickets={tickets} />
 
         <PaginationControls

@@ -26,10 +26,11 @@ export const TicketsProvider = ({ children }) => {
       const response = await api.tickets.getAllTickets();
       const ticketsList = response.data?.tickets || [];
       const paginationInfo = response.data?.pagination || null;
+    
 
       setTickets(ticketsList);
       setPagination(paginationInfo);
-
+      console.log('all tickets:', response.data.tickets)
       console.log("[Tickets] Loaded:", ticketsList.length);
 
       return {
@@ -102,7 +103,7 @@ export const TicketsProvider = ({ children }) => {
         success: true,
         message: "Ticket created successfully",
         data: newTicket,
-      };
+      }
     } catch (error) {
       console.error("[CreateTicket] Failed:", error);
       return {

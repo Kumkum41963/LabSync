@@ -1,23 +1,30 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+import { TooltipProvider } from "@/components/ui/tooltip"; // Import this
 
 const Layout = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen bg-[#0f172a] text-white">
-      {/* Sidebar (collapsible) */}
-      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+    /* Wrap everything in the Provider */
+    <TooltipProvider delayDuration={0}>
+      <div className="flex min-h-screen bg-background text-foreground">
+        {/* Sidebar uses the tooltips internally */}
+        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      {/* Main Content Area */}
-      <div className="flex flex-col flex-1">
-        {/* <Navbar /> */}
-        <main className="flex-1 overflow-y-auto bg-[#acbeea] dark:bg-[#4c68b2] ">
-          <Outlet />
-        </main>
+        <div className="flex flex-col flex-1 min-w-0">
+          <Navbar />
+
+          <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+            <div className="max-w-[1400px] mx-auto animate-in fade-in duration-500">
+              <Outlet />
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
 

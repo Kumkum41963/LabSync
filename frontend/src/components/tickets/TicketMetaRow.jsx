@@ -2,13 +2,13 @@ import React from "react";
 
 const Badge = ({ children, variant = "default" }) => {
   const styles = {
-    default: "bg-muted text-foreground",
-    open: "bg-blue-500/10 text-blue-400",
-    progress: "bg-amber-500/10 text-amber-400",
-    closed: "bg-emerald-500/10 text-emerald-400",
-    high: "bg-red-500/10 text-red-400",
-    medium: "bg-yellow-500/10 text-yellow-400",
-    low: "bg-slate-500/10 text-slate-400",
+    default: "bg-muted/80 text-foreground border border-border",
+    open: "bg-primary/20 text-primary border border-primary/40",
+    progress: "bg-secondary/20 text-secondary border border-secondary/40",
+    closed: "bg-emerald-400/18 text-emerald-200 border border-emerald-400/40",
+    high: "bg-fuchsia-500/16 text-fuchsia-200 border border-fuchsia-400/38",
+    medium: "bg-indigo-500/16 text-indigo-200 border border-indigo-400/38",
+    low: "bg-primary/12 text-primary/90 border border-primary/30",
   };
 
   return (

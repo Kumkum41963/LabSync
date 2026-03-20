@@ -7,13 +7,13 @@ function CheckAuth({ children, allowedRoles }) {
 
   const { isAuthenticated, isLoadingAuth, currentUser } = useAuth();
 
-  // loading state
-  if (isLoadingAuth) {
+  // loading state: when no auth yet determined
+  if (isLoadingAuth && !currentUser) {
     return <Loader/>
   }
 
   // authenticated check 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isLoadingAuth) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

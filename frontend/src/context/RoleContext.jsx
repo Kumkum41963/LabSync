@@ -7,7 +7,9 @@ const RoleContext = createContext()
 export const RoleProvider = ({ children }) => {
 
     const { currentUser } = useAuth()
+    console.log('currentUser:', currentUser)
     const [role, setRole] = useState(storage.getRole())
+    console.log('role from currentUser:', role)
 
     // Mount the role everytime page loads (user changes: login, logout, signup)
     useEffect(() => {

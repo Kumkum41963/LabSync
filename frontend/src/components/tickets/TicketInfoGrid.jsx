@@ -43,7 +43,7 @@ const TicketInfoGrid = ({ status, priority, createdBy, assignedTo, assignedBy, }
             {infoItems.map((item, idx) => (
                 <div
                     key={idx}
-                    className="p-4 border border-slate-700 rounded-xl bg-slate-900/40 hover:bg-slate-900/60 transition-all shadow-inner shadow-cyan-900/20"
+                    className="p-4 border border-border rounded-xl bg-card/60 hover:bg-card/80 transition-all shadow-inner shadow-primary/25"
                 >
                     <p className="text-xs text-slate-400 mb-1">{item.label}</p>
                     <div className="text-sm">{item.content}</div>

@@ -10,6 +10,7 @@ import Tickets from "@/pages/Tickets/Tickets";
 import TicketDetails from "@/pages/Tickets/TicketDetails";
 import CreateTicket from "@/pages/Tickets/CreateTicket";
 import UpdateTicket from "@/pages/Tickets/UpdateTicket";
+import TicketWrapper from "@/components/tickets/TicketWrapper";
 
 import Notices from "@/pages/Notices";
 import Applications from "@/pages/Applications";
@@ -43,10 +44,22 @@ const AppRoutes = () => {
 
           {/* 🎟️ Tickets (Main + Subroutes) */}
           <Route path="tickets">
+            {/* All Tickets */}
             <Route index element={<Tickets />} /> {/* /tickets */}
+            {/* Create Ticket */}
             <Route path="create" element={<CreateTicket />} /> {/* /tickets/create */}
-            <Route path=":id" element={<TicketDetails />} /> {/* /tickets/:id */}
-            <Route path=":id/edit" element={<UpdateTicket />} /> {/* /tickets/:id/edit */}
+            {/* Get Ticket By Id */}
+            <Route path=":id" element={
+              <TicketWrapper>
+                <TicketDetails />
+              </TicketWrapper>
+            } /> {/* /tickets/:id */}
+            {/* Update Ticket */}
+            <Route path=":id/update" element={
+              <TicketWrapper>
+                <UpdateTicket />
+              </TicketWrapper>
+            } /> {/* /tickets/:id/edit */}
           </Route>
 
           {/* 🧾 Applications */}

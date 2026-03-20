@@ -1,51 +1,42 @@
-import React, { useState } from "react";
+import React from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "../ui/button";
-import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Moon, Sun, User } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const Navbar = () => {
-  const { currentUser, handleLogout } = useAuth();
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const { currentUser } = useAuth();
+  // Simplified theme toggle logic
+  const [isDark, setIsDark] = React.useState(true);
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle("dark", !isDarkMode);
+    setIsDark(!isDark);
+    document.documentElement.classList.toggle("dark");
   };
 
   return (
-    <header className="w-full bg-[#0f172a] dark:bg-[#0b1120] border-b border-cyan-500/30 text-white fixed top-0 right-0 z-40 flex justify-end items-center px-6 py-4 h-19.5">
+    <header className="h-[70px] border-b border-border bg-card/50 backdrop-blur-md px-6 flex items-center justify-end sticky top-0 z-40">
       <div className="flex items-center gap-4">
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-full border border-cyan-500/40 hover:bg-cyan-500/10 transition"
-        >
-          {isDarkMode ? (
-            <Sun className="w-5 h-5 text-cyan-400" />
-          ) : (
-            <Moon className="w-5 h-5 text-cyan-400" />
-          )}
-        </button>
+        <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full text-muted-foreground">
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </Button>
+
+        <div className="h-6 w-[1px] bg-border mx-2" />
 
         {currentUser ? (
-          <Button
-            onClick={handleLogout}
-            variant="outline"
-            className="border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10"
-          >
-            Logout
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium leading-none">{currentUser.name}</p>
+              <p className="text-xs text-muted-foreground capitalize">{currentUser.role.replace('_', ' ')}</p>
+            </div>
+            <Avatar className="h-9 w-9 border border-primary/20">
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {currentUser.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </div>
         ) : (
-          <>
-            <Button
-              variant="outline"
-              className="border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10"
-            >
-              Login
-            </Button>
-            <Button className="bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-pink-500 hover:to-cyan-400 text-white">
-              Sign Up
-            </Button>
-          </>
+          <Button size="sm">Sign In</Button>
         )}
       </div>
     </header>
@@ -53,4 +44,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

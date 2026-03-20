@@ -14,8 +14,9 @@ export const AuthProvider = ({ children }) => {
 
   const saveSession = (data) => {
     console.log("[Auth] Saving session", data);
+    console.log('how is data like in saving session:', data)
     storage.setToken(data.token);
-    storage.setRole(data.role);
+    storage.setRole(data.user.role);
     storage.setUser(data.user);
     setCurrentUser(data.user);
   };
