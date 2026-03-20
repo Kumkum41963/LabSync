@@ -26,7 +26,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          "h-screen bg-card border-r border-border flex flex-col transition-all duration-300 z-50 sticky top-0",
+          "h-screen bg-background border-r border-border flex flex-col transition-all duration-300 z-50 sticky top-0",
           collapsed ? "w-[80px]" : "w-[260px]"
         )}
       >

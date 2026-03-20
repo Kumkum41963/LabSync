@@ -41,7 +41,7 @@ const Tickets = () => {
       </div>
 
       {/* Filters + List */}
-      <div className="glass-panel bg-card border border-border rounded-xl shadow-sm p-5 space-y-6">
+      <div className="glass-panel bg-card border border-border rounded-lg shadow-sm p-5 space-y-6">
         {/* Search and Filter */}
         <TicketsHeader params={params} setParams={setParams} />
 

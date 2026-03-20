@@ -8,6 +8,7 @@
   --color-foreground: #f3f7ff;
   --color-border: #12202f;
   --color-input: #08141f;
+  --color-input-border: #2d3f50;
   --color-ring: #0acdcd;
 
   /* Brand colors (single place control) */
@@ -64,6 +65,22 @@
   --shadow-lg: 0px 12px 40px rgba(0, 0, 0, 0.65);
   --shadow-xl: 0px 16px 52px rgba(0, 0, 0, 0.75);
   --shadow-2xl: 0px 24px 72px rgba(0, 0, 0, 0.85);
+
+  /* Status Colors for consistent badge styling */
+  --status-open: #13b9bf;
+  --status-open-bg: rgba(19, 185, 191, 0.12);
+  --status-progress: #6f5de4;
+  --status-progress-bg: rgba(111, 93, 228, 0.12);
+  --status-closed: #10b981;
+  --status-closed-bg: rgba(16, 185, 145, 0.12);
+
+  /* Priority Colors for consistent priority styling */
+  --priority-high: #f43f5e;
+  --priority-high-bg: rgba(244, 63, 94, 0.12);
+  --priority-medium: #eab308;
+  --priority-medium-bg: rgba(234, 179, 8, 0.12);
+  --priority-low: #13b9bf;
+  --priority-low-bg: rgba(19, 185, 191, 0.12);
 }
 
 /* Logic for automatic button borders using CSS Relative Colors */
@@ -196,6 +213,44 @@
   .border.hover-elevate-2::after,
   .border.active-elevate-2::after {
     @apply -inset-px;
+  }
+
+  /* Status Badge Colors */
+  .badge-open {
+    background-color: var(--status-open-bg);
+    color: var(--status-open);
+    border-color: rgba(19, 185, 191, 0.3);
+  }
+
+  .badge-progress {
+    background-color: var(--status-progress-bg);
+    color: var(--status-progress);
+    border-color: rgba(111, 93, 228, 0.3);
+  }
+
+  .badge-closed {
+    background-color: var(--status-closed-bg);
+    color: var(--status-closed);
+    border-color: rgba(16, 185, 145, 0.3);
+  }
+
+  /* Priority Badge Colors */
+  .badge-high {
+    background-color: var(--priority-high-bg);
+    color: var(--priority-high);
+    border-color: rgba(244, 63, 94, 0.3);
+  }
+
+  .badge-medium {
+    background-color: var(--priority-medium-bg);
+    color: var(--priority-medium);
+    border-color: rgba(234, 179, 8, 0.3);
+  }
+
+  .badge-low {
+    background-color: var(--priority-low-bg);
+    color: var(--priority-low);
+    border-color: rgba(19, 185, 191, 0.3);
   }
 }
 

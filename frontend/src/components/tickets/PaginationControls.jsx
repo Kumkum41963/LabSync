@@ -1,29 +1,39 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const PaginationControls = ({ page, totalPages, onChange }) => {
   return (
-    <div className="flex items-center justify-center gap-4 mt-6">
-      <button
+    <div className="flex items-center justify-center gap-4 mt-8">
+      <Button
+        variant="outline"
+        size="sm"
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
-        className="px-3 py-2 bg-gray-700 rounded disabled:opacity-40"
+        className="gap-2"
       >
-        Prev
-      </button>
+        <ChevronLeft className="w-4 h-4" />
+        Previous
+      </Button>
 
-      <span className="text-gray-300">
-        Page {page} of {totalPages}
-      </span>
+      <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted/50 border border-border">
+        <span className="text-sm font-medium">
+          Page <span className="text-primary font-semibold">{page}</span> of <span className="text-primary font-semibold">{totalPages}</span>
+        </span>
+      </div>
 
-      <button
+      <Button
+        variant="outline"
+        size="sm"
         disabled={page >= totalPages}
         onClick={() => onChange(page + 1)}
-        className="px-3 py-2 bg-gray-700 rounded disabled:opacity-40"
+        className="gap-2"
       >
         Next
-      </button>
+        <ChevronRight className="w-4 h-4" />
+      </Button>
     </div>
   );
 };
 
-export default  PaginationControls;
+export default PaginationControls;

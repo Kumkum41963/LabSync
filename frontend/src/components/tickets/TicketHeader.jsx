@@ -33,11 +33,11 @@ const TicketHeader = ({ ticket }) => {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
         {/* Show the ticket details */}
         <button
           onClick={() => navigate(`/tickets/${ticket._id}`)}
-          className="p-2 rounded-md hover:bg-accent/35 transition-colors"
+          className="p-2 rounded-lg hover:bg-accent/30 transition-colors text-muted-foreground hover:text-foreground"
         >
           <ExternalLink size={16} />
         </button>
@@ -45,7 +45,7 @@ const TicketHeader = ({ ticket }) => {
         {/* Update ticket */}
         <button
           onClick={() => navigate(`/tickets/${ticket._id}/update`)}
-          className="p-2 rounded-md hover:bg-accent/35 transition-colors"
+          className="p-2 rounded-lg hover:bg-accent/30 transition-colors text-muted-foreground hover:text-foreground"
         >
           <Pencil size={16} />
         </button>
@@ -54,7 +54,7 @@ const TicketHeader = ({ ticket }) => {
         <button
           onClick={handleDelete}
           disabled={isDeleting}
-          className="p-2 rounded-md hover:bg-destructive/30 text-destructive transition-colors disabled:opacity-50"
+          className="p-2 rounded-lg hover:bg-destructive/20 text-destructive transition-colors disabled:opacity-50"
         >
           {isDeleting ? "..." : <Trash2 size={16} />}
         </button>

@@ -44,7 +44,7 @@ const AuthSidebar = ({ title = "Welcome to Labsync", subtitle }) => {
           {title}
         </h1>
 
-        <p className="mt-6 text-lg leading-relaxed text-gray-400">
+        <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
           {subtitle ||
             "Collaborate, innovate, and streamline your lab workflows seamlessly."}
         </p>

@@ -19,7 +19,7 @@ const TicketTable = ({ tickets, role }) => {
     const isLab = role === "lab_assistant";
 
     return (
-        <div className="rounded-xl border border-border bg-card/50 backdrop-blur-sm overflow-x-auto w-full">
+        <div className="rounded-lg border border-border bg-card/50 backdrop-blur-sm overflow-x-auto w-full">
             <Table className="min-w-[700px] md:min-w-full">
                 <TableHeader className="bg-muted/50">
                     <TableRow>
@@ -52,19 +52,13 @@ const TicketTable = ({ tickets, role }) => {
                             </TableCell>
 
                             <TableCell>
-                                <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 capitalize text-[10px] md:text-xs">
+                                <Badge variant="outline" className={`badge-${ticket.status.toLowerCase()} text-xs capitalize`}>
                                     {ticket.status}
                                 </Badge>
                             </TableCell>
 
                             <TableCell>
-                                <Badge
-                                    variant="secondary"
-                                    className={`capitalize text-[10px] md:text-xs ${ticket.priority === "high" ? "bg-red-500/10 text-red-400" :
-                                            ticket.priority === "medium" ? "bg-yellow-500/10 text-yellow-400" :
-                                                "bg-emerald-500/10 text-emerald-400"
-                                        }`}
-                                >
+                                <Badge variant="outline" className={`badge-${ticket.priority.toLowerCase()} text-xs capitalize`}>
                                     {ticket.priority}
                                 </Badge>
                             </TableCell>
@@ -72,7 +66,7 @@ const TicketTable = ({ tickets, role }) => {
                             <TableCell className="hidden sm:table-cell">
                                 <div className="flex flex-wrap gap-1">
                                     {ticket.tags?.slice(0, 1).map((tag) => (
-                                        <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0">
+                                        <Badge key={tag} variant="outline" className="text-xs px-2 py-1">
                                             {tag}
                                         </Badge>
                                     ))}
@@ -81,14 +75,14 @@ const TicketTable = ({ tickets, role }) => {
 
                             {/* Data Logic: Assigned By (Visible to Admin & Mod) */}
                             {(isAdmin || isMod) && (
-                                <TableCell className="text-muted-foreground text-[11px] md:text-xs">
+                                <TableCell className="text-muted-foreground text-xs">
                                     {ticket.assignedByLabAssistant?.name || "—"}
                                 </TableCell>
                             )}
 
                             {/* Data Logic: Assigned To (Visible to Admin & Lab) */}
                             {(isAdmin || isLab) && (
-                                <TableCell className="text-muted-foreground text-[11px] md:text-xs">
+                                <TableCell className="text-muted-foreground text-xs">
                                     {ticket.assignedModerator?.name || "Unassigned"}
                                 </TableCell>
                             )}

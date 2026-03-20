@@ -11,9 +11,9 @@ export default function UpdateTicket({ ticket }) {
   const handleUpdate = async (formData) => {
     setIsSubmitting(true);
     try {
-      await updateTicket(formData, ticket.id);
+      await updateTicket(formData, ticket._id);
       console.log("Ticket Updated Successfully!");
-      navigate(`/tickets/${ticket.id}`); // redirect back to details
+      navigate(`/tickets/${ticket._id}`); // redirect back to details
     } catch (error) {
       console.error("Failed to update ticket:", error);
     } finally {
@@ -22,10 +22,13 @@ export default function UpdateTicket({ ticket }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 p-4 glass-panel border border-border">
-      <h1 className="text-2xl font-semibold glass-heading">Update Your Ticket</h1>
+    <div className="max-w-2xl mx-auto space-y-6 p-6 glass-panel border border-border rounded-lg">
+      <div>
+        <h1 className="text-2xl font-semibold glass-heading">Update Your Ticket</h1>
+        <p className="text-muted-foreground text-sm mt-2">Modify the ticket details</p>
+      </div>
       <TicketForm
-        key={ticket.id} // ensure on mount changes are actually applied
+        key={ticket._id} // ensure on mount changes are actually applied
         initialData={ticket}
         onSubmit={handleUpdate}
         loading={isSubmitting}

@@ -19,8 +19,11 @@ export default function CreateTicket() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 p-4 glass-panel border border-border">
-      <h1 className="text-2xl font-semibold glass-heading">Create New Ticket</h1>
+    <div className="max-w-2xl mx-auto space-y-6 p-6 glass-panel border border-border rounded-lg">
+      <div>
+        <h1 className="text-2xl font-semibold glass-heading">Create New Ticket</h1>
+        <p className="text-muted-foreground text-sm mt-2">Create a new support ticket for your issue</p>
+      </div>
       <TicketForm 
         onSubmit={handleCreate} 
         loading={isSubmitting} 

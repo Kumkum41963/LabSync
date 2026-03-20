@@ -18,7 +18,7 @@ const TicketInfoGrid = ({ status, priority, createdBy, assignedTo, assignedBy, }
                     <img
                         src={createdBy?.avatar || "https://via.placeholder.com/32"}
                         alt=""
-                        className="w-8 h-8 rounded-full border border-slate-700"
+                        className="w-8 h-8 rounded-full border border-border"
                     />
                     <span>{createdBy?.name || "Unknown"}</span>
                 </div>
@@ -27,13 +27,13 @@ const TicketInfoGrid = ({ status, priority, createdBy, assignedTo, assignedBy, }
         {
             label: "Assigned To",
             content: assignedTo?.name || (
-                <span className="text-gray-500 italic">Not assigned</span>
+                <span className="text-muted-foreground italic">Not assigned</span>
             ),
         },
         {
             label: "Assigned By",
             content: assignedBy?.name || (
-                <span className="text-gray-500 italic">Not specified</span>
+                <span className="text-muted-foreground italic">Not specified</span>
             ),
         },
     ];
@@ -43,10 +43,10 @@ const TicketInfoGrid = ({ status, priority, createdBy, assignedTo, assignedBy, }
             {infoItems.map((item, idx) => (
                 <div
                     key={idx}
-                    className="p-4 border border-border rounded-xl bg-card/60 hover:bg-card/80 transition-all shadow-inner shadow-primary/25"
+                    className="p-4 border border-border rounded-lg bg-card/60 hover:bg-card/80 transition-all shadow-inner shadow-primary/25"
                 >
-                    <p className="text-xs text-slate-400 mb-1">{item.label}</p>
-                    <div className="text-sm">{item.content}</div>
+                    <p className="text-xs text-muted-foreground mb-1">{item.label}</p>
+                    <div className="text-sm text-foreground">{item.content}</div>
                 </div>
             ))}
         </div>

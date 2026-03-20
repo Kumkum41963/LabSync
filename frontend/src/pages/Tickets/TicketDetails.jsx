@@ -18,7 +18,7 @@ export default function TicketDetails({ ticket }) {
       <div className="flex items-start gap-4 mb-8">
         <button
           onClick={onBack}
-          className="p-2 hover:bg-white/5 rounded-lg transition"
+          className="p-2 hover:bg-accent/20 rounded-lg transition text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -27,22 +27,22 @@ export default function TicketDetails({ ticket }) {
           <h1 className="text-2xl sm:text-3xl font-semibold">
             {ticket.title}
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Ticket ID: {ticket.id}
+          <p className="text-sm text-muted-foreground mt-1">
+            Ticket ID: {ticket._id}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="glass-panel border border-border rounded-xl p-6">
+          <div className="glass-panel border border-border rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-4">Description</h2>
             <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
               {ticket.description}
             </p>
           </div>
 
-          <div className="glass-panel border border-border rounded-xl p-6">
+          <div className="glass-panel border border-border rounded-lg p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
@@ -50,29 +50,29 @@ export default function TicketDetails({ ticket }) {
               </div>
               <Button
                 onClick={onGenerateAI}
-                className="bg-primary hover:bg-primary/80 text-white"
+                size="sm"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Generate Analysis
               </Button>
             </div>
-            <div className="flex flex-col items-center justify-center py-12 text-center text-gray-400">
+            <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
               <Sparkles className="w-10 h-10 mb-4 opacity-40" />
               <p className="max-w-md">
-                Click <span className="text-white font-medium">"Generate Analysis"</span> for AI insights.
+                Click <span className="text-foreground font-medium">"Generate Analysis"</span> for AI insights.
               </p>
             </div>
           </div>
         </div>
 
         <div className="space-y-6">
-          <div className="glass-panel border border-border rounded-xl p-6">
+          <div className="glass-panel border border-border rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-6">Details</h2>
             <div className="space-y-5">
               <DetailRow
                 label="Status"
                 value={
-                  <Badge className="bg-blue-600/20 text-blue-400 border-blue-500/30">
+                  <Badge className={`badge-${ticket.status.toLowerCase()} border`}>
                     {ticket.status}
                   </Badge>
                 }
@@ -80,7 +80,7 @@ export default function TicketDetails({ ticket }) {
               <DetailRow
                 label="Priority"
                 value={
-                  <Badge className="bg-red-600/20 text-red-400 border-red-500/30">
+                  <Badge className={`badge-${ticket.priority.toLowerCase()} border`}>
                     {ticket.priority}
                   </Badge>
                 }
@@ -88,7 +88,7 @@ export default function TicketDetails({ ticket }) {
               <DetailRow
                 icon={<User className="w-4 h-4" />}
                 label="Assigned To"
-                value={ticket.assignedTo || "Unassigned"}
+                value={ticket.assignedTo?.name || "Unassigned"}
               />
               <DetailRow
                 icon={<Clock className="w-4 h-4" />}
@@ -98,7 +98,7 @@ export default function TicketDetails({ ticket }) {
             </div>
           </div>
 
-          <div className="glass-panel border border-border rounded-xl p-6">
+          <div className="glass-panel border border-border rounded-lg p-6">
             <div className="flex items-center gap-2 mb-4">
               <Tag className="w-4 h-4" />
               <h2 className="text-lg font-semibold">Tags</h2>
@@ -106,12 +106,12 @@ export default function TicketDetails({ ticket }) {
             <div className="flex flex-wrap gap-2">
               {ticket.tags?.length ? (
                 ticket.tags.map((tag) => (
-                    <span key={tag} className="px-3 py-1 text-sm rounded-full bg-primary/20 text-primary border border-primary/40">
+                    <Badge key={tag} variant="outline" className="text-xs">
                     {tag}
-                  </span>
+                  </Badge>
                 ))
               ) : (
-                <span className="text-sm text-gray-500">No tags</span>
+                <span className="text-sm text-muted-foreground">No tags</span>
               )}
             </div>
           </div>
@@ -124,11 +124,11 @@ export default function TicketDetails({ ticket }) {
 function DetailRow({ icon, label, value }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <div className="flex items-center gap-2 text-gray-400">
+      <div className="flex items-center gap-2 text-muted-foreground">
         {icon}
-        <span>{label}</span>
+        <span className="text-sm">{label}</span>
       </div>
-      <div className="text-right font-medium">{value}</div>
+      <div className="text-right font-medium text-sm">{value}</div>
     </div>
   );
 }
