@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import User from "../models/user.model.js";
 
 /*
-✅ Authenticate Middleware:
+Authenticate Middleware:
    - Verifies JWT token from header
    - Attaches the logged-in user to req.user
 */
@@ -16,8 +16,13 @@ export const authenticate = async (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // ✅ Make sure decoded.id matches what you used in jwt.sign
+        // Make sure decoded.id matches what you used in jwt.sign
         req.user = await User.findById(decoded.id).select("-password");
+
+        // if token still exists but not the user
+        if (!req.user) {
+            return res.status(401).json({ error: "User no longer exists." })
+        }
 
         next();
     } catch (err) {
@@ -27,16 +32,26 @@ export const authenticate = async (req, res, next) => {
 }
 
 /*
-✅ Authorizable Middleware:
+Authorizable Middleware:
     - Restricts route access based on user roles
 */
 export const authorizedRoles = (...roles) => {
-    return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
-            return res.status(403).json({ message: "Access denied. Role not allowed." })
+    try {
+        // spread the current role into an array named roles
+        return (req, res, next) => {
+            const userRole = req.user?.role.toLowerCase(); // get the actual role from users req
+            const allowedRoles = roles.map(r => r.toLowerCase()); // convert the allowed roles as passed to middleware into lowercase and keep in allowedRoles
+            // match if access is allowed
+            if (!allowedRoles.includes(userRole)) {
+                return res.status(403).json({ message: "Access denied. User Role not allowed." })
+            }
+            next()
         }
-        next()
+    } catch (error) {
+        console.error("Role verification failed:", error.message);
+        return res.status(401).json({ message: "Not accessible, role invalid or not allowed." });
     }
 }
 
-// ... rest para in js accepts any no. of paras and bundles em into an array named roles
+// (...) spread operator in js accepts any no. of paras and bundles em into an array named roles
+

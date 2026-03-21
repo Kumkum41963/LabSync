@@ -1,27 +1,51 @@
-import { ArrowLeft, Sparkles, User, Clock, Tag } from "lucide-react";
+import {  Sparkles, User, Clock, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useTickets } from "@/context/TicketsContext";
+import BackBtn from "@/components/tickets/BackBtn";
 
-export default function TicketDetails({ ticket }) {
-  console.log(ticket.id)
+export default function TicketDetails() {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { tickets, getTicketById } = useTickets();
 
-  const onBack = () => navigate(-1);
+  const [loading, setLoading] = useState(true);
+
+  const ticket = tickets.find(t => t._id === id);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!ticket) {
+        await getTicketById(id);
+      }
+      setLoading(false);
+    };
+    load();
+  }, [id]); // keep minimal deps
+
   const onGenerateAI = () => {
-    console.log("Generating AI analysis for ticket:", ticket.id);
+    console.log("Generating AI analysis for ticket:", ticket?._id);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading ticket...
+      </div>
+    );
+  }
+
+  if (!ticket) {
+    return <Navigate to="/tickets" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10">
       {/* Back + Title */}
       <div className="flex items-start gap-4 mb-8">
-        <button
-          onClick={onBack}
-          className="p-2 hover:bg-accent/20 rounded-lg transition text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+       <BackBtn/>
 
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold">
@@ -48,10 +72,7 @@ export default function TicketDetails({ ticket }) {
                 <Sparkles className="w-5 h-5 text-primary" />
                 <h2 className="text-lg font-semibold text-primary">AI Analysis</h2>
               </div>
-              <Button
-                onClick={onGenerateAI}
-                size="sm"
-              >
+              <Button onClick={onGenerateAI} size="sm">
                 <Sparkles className="w-4 h-4 mr-2" />
                 Generate Analysis
               </Button>
@@ -106,7 +127,7 @@ export default function TicketDetails({ ticket }) {
             <div className="flex flex-wrap gap-2">
               {ticket.tags?.length ? (
                 ticket.tags.map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-xs">
+                  <Badge key={tag} variant="outline" className="text-xs">
                     {tag}
                   </Badge>
                 ))

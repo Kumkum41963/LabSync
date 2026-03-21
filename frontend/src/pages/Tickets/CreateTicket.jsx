@@ -1,6 +1,7 @@
 import TicketForm from "@/components/tickets/TicketForm";
 import { useTickets } from "@/context/TicketsContext";
 import { useState } from "react";
+import BackBtn from "@/components/tickets/BackBtn";
 
 export default function CreateTicket() {
   const { createTicket } = useTickets();
@@ -9,8 +10,9 @@ export default function CreateTicket() {
   const handleCreate = async (formData) => {
     setIsSubmitting(true);
     try {
-      await createTicket(formData); 
+      await createTicket(formData);
       console.log("Ticket Created Successfully!");
+      navigate(`/tickets/${ticket._id}`); // redirect back to details
     } catch (error) {
       console.error("Failed to create ticket:", error);
     } finally {
@@ -21,13 +23,14 @@ export default function CreateTicket() {
   return (
     <div className="max-w-2xl mx-auto space-y-6 p-6 glass-panel border border-border rounded-lg">
       <div>
+        <BackBtn />
         <h1 className="text-2xl font-semibold glass-heading">Create New Ticket</h1>
         <p className="text-muted-foreground text-sm mt-2">Create a new support ticket for your issue</p>
       </div>
-      <TicketForm 
-        onSubmit={handleCreate} 
-        loading={isSubmitting} 
-        submitLabel="Create Ticket" 
+      <TicketForm
+        onSubmit={handleCreate}
+        loading={isSubmitting}
+        submitLabel="Create Ticket"
       />
     </div>
   );

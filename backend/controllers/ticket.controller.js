@@ -42,7 +42,7 @@ export const createTicket = async (req, res) => {
     if (!title || !description) {
       console.warn("⚠️ Missing required ticket fields");
       return res.status(400).json({
-        message: "Title, descriptionare required",
+        message: "Title, description are required",
       });
     }
 
