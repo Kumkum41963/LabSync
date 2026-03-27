@@ -11,6 +11,8 @@ import TicketDetails from "@/pages/Tickets/TicketDetails";
 import CreateTicket from "@/pages/Tickets/CreateTicket";
 import UpdateTicket from "@/pages/Tickets/UpdateTicket";
 
+import Profile from "@/components/auth/Profile";
+import Settings from "@/pages/Settings";
 import Notices from "@/pages/Notices";
 import Applications from "@/pages/Applications";
 import Inventory from "@/pages/Inventory";
@@ -52,6 +54,10 @@ const AppRoutes = () => {
             {/* Update Ticket */}
             <Route path=":id/update" element={<UpdateTicket />} /> {/* /tickets/:id/edit */}
           </Route>
+
+           {/* 🧾 Settings */}
+          <Route path="settings" element={<Settings />} />
+          <Route path="/profile/:id" element={<Profile />} />
 
           {/* 🧾 Applications */}
           <Route path="applications" element={<Applications />} />

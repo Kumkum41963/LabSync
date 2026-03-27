@@ -11,19 +11,22 @@ export const AuthProvider = ({ children }) => {
   // Store the current user in state if exists already
   const [currentUser, setCurrentUser] = useState(storage.getUser());
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [users, setUsers] = useState([]); // for a list of all users 
 
   const saveSession = (data) => {
-    console.log("[Auth] Saving session", data);
-    console.log('how is data like in saving session:', data)
-    storage.setToken(data.token);
-    storage.setRole(data.user.role);
-    storage.setUser(data.user);
-    setCurrentUser(data.user);
+    // Use the new token if provided, otherwise stick with the one we have
+    const token = data.token || storage.getToken();
+    const user = data.user;
+
+    storage.setToken(token);
+    storage.setRole(user.role);
+    storage.setUser(user);
+    setCurrentUser(user);
   };
 
   const clearSession = () => {
     console.log("[Auth] Clearing session");
-    storage.clearSession();
+    storage.clearLocalStorage();
     setCurrentUser(null);
   };
 
@@ -36,9 +39,9 @@ export const AuthProvider = ({ children }) => {
       saveSession(res.data);
       console.log("[Auth] Login success", res.data);
     } catch (err) {
-      if(err.respone) {
-        const {status }= err.response
-        if(status === 400 || status === 401) {
+      if (err.respone) {
+        const { status } = err.response
+        if (status === 400 || status === 401) {
           alert("Invalid Credentials")
         }
       }
@@ -69,12 +72,49 @@ export const AuthProvider = ({ children }) => {
   const handleLogout = async () => {
     try {
       console.log("[Auth] Logout start");
-    await api.auth.logout();
-    clearSession();
-    console.log("[Auth] Logout success");
+      await api.auth.logout();
+      clearSession();
+      console.log("[Auth] Logout success");
     } catch (error) {
-       console.error("Logout failed:", err.message);
-      throw new Error(err.response?.data?.message || "Logout failed");
+      console.error("Logout failed:", error.message);
+      throw new Error(error.response?.data?.message || "Logout failed");
+    }
+  };
+
+  const handleUpdateRole = async (targetId, newRole) => {
+    try {
+      const res = await api.auth.updateRole(targetId, newRole);
+      // If I edited myself, sync my local state
+      if (res.data?.user && currentUser?.id === targetId) {
+        saveSession({ user: res.data.user });
+      }
+      return res.data;
+    } catch (err) {
+      console.log('Error in updating role:', err.message);
+      throw err;
+    }
+  };
+
+  const handleUpdateSkills = async (targetId, newSkills) => {
+    try {
+      const res = await api.auth.updateSkills(targetId, newSkills);
+      // If I edited myself, sync my local state
+      if (res.data?.user && currentUser?.id === targetId) {
+        saveSession({ user: res.data.user });
+      }
+      return res.data;
+    } catch (err) {
+      console.log('Error in updating skills:', err.message);
+      throw err;
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    try {
+      const res = await api.auth.getAllUsers();
+      setUsers(res.data);
+    } catch (err) {
+      console.error("Failed to fetch users", err.message);
     }
   };
 
@@ -88,6 +128,9 @@ export const AuthProvider = ({ children }) => {
         handleLogin,
         handleLogout,
         handleSignup,
+        handleUpdateRole,
+        handleUpdateSkills,
+        fetchAllUsers,
         isAuthenticated: !!currentUser,
       }}
     >

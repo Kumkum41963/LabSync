@@ -177,60 +177,128 @@ export const logout = async (req, res) => {
   }
 };
 
-export const updateUser = async (req, res) => {
-  const { skills = [], role, email } = req.body;
-
+// Update Skills 
+// Moderators Faculty Admin - roles allowed 
+// Only owner allowed to do so 
+// Get the user id 
+// Match with the incoming id in params from req
+// Matches - update else no
+// Get the user from db 
+// update the skills as we received from the req
+export const updateSkills = async (req, res) => {
   try {
-    if (req.user?.role !== "admin") {
-      return res.status(401).json({ error: "Forbidden" });
-    }
+    const { targetId } = req.params;
+    const { skills } = req.body;
 
-    const user = await User.findOne({ email });
-
-    if (!user) return res.status(401).json({ error: "User not found" });
-
-    await User.updateOne(
-      { email },
-      { skills: skills.length ? skills : user.skills, role }
-    );
-
-    return res.json({ message: "User updated successfully" });
-  } catch (error) {
-    res.status(500).json({
-      error: "update failed",
-      details: error.message,
-    });
-  }
-};
-
-export const getCurrentUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select("-password");
-
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    return res.json({ user });
-  } catch (error) {
-    res.status(500).json({
-      error: "update failed",
-      details: error.message,
-    });
-  }
-};
-
-export const getAllUser = async (req, res) => {
-  try {
-    const allowedRoles = ["admin", "lab_assistant"];
-    if (!allowedRoles.includes(req.user.role)) {
+    if (req.user.role !== "admin" && req.user.id !== targetId) {
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    const users = await User.find().select("-password");
-    return res.json({ users });
+    const user = await User.findByIdAndUpdate(targetId, { skills }, { new: true }).select("-password");
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Consistent Key: "user"
+    res.status(200).json({ message: "Skills updated", user }); 
   } catch (error) {
-    res.status(500).json({
-      error: "update failed",
-      details: error.message,
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Update Role
+// Faculty Admin - roles allowed 
+// Get the user from db 
+// update the role as we received from the req
+export const updateRoles = async (req, res) => {
+  try {
+    const { targetId } = req.params;
+    const { role } = req.body;
+
+    if (req.user.role !== "admin" || req.user.id !== "lab_assistant") {
+      return res.status(403).json({ error: "Only admins or lab assistants can change roles" });
+    }
+
+    const user = await User.findByIdAndUpdate(targetId, { role }, { new: true }).select("-password");
+    
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.status(200).json({ message: "Role updated", user });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get the profile of the logged in user
+export const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Unauthorized", 
+        message: "User ID missing from request." 
+      });
+    }
+
+    const user = await User.findById(userId).select("-password -__v");
+
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Not Found", 
+        message: "User profile does not exist in our records." 
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user
     });
+  } catch (error) {
+    console.log('Error in fetchinf current user:', error.message)
+    return res.status(500).json({
+      success: false,
+      error: "Server Error",
+      message: error.message
+    });
+  }
+};
+
+// Get all users
+export const getAllUsers = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+
+    const users = await User.find({ _id: { $ne: userId } }) 
+      .select("-password -__v")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      count: users.length,
+      users 
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: "Data retrieval failed",
+      message: error.message
+    });
+  }
+};
+
+// Get user by Id
+export const getUserById = async (req, res) => {
+  try {
+    const { targetId } = req.params;
+    const user = await User.findById(targetId).select("-password -__v");
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    console.log('Error in fetching user by id:', error.message)
+    res.status(500).json({ success: false, message: error.message });
   }
 };

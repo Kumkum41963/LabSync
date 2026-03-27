@@ -1,40 +1,29 @@
-import React, { createContext, useContext, useEffect, useState } from "react"
-import { useAuth } from "@/context/AuthContext"
-import { storage } from "@/services/storage"
+import React, { createContext, useContext } from "react";
+import { useAuth } from "./AuthContext";
 
-const RoleContext = createContext()
+const RoleContext = createContext();
 
 export const RoleProvider = ({ children }) => {
+  const { currentUser } = useAuth();
 
-    const { currentUser } = useAuth()
-    console.log('currentUser:', currentUser)
-    const [role, setRole] = useState(storage.getRole())
-    console.log('role from currentUser:', role)
+  // If user is logged in, get their role. Otherwise, null.
+  const role = currentUser?.role || null;
 
-    // Mount the role everytime page loads (user changes: login, logout, signup)
-    useEffect(() => {
-        if (!currentUser) {
-            setRole(null)
-        } else {
-            setRole(storage.getRole())
-        }
-    }, [currentUser])
+  // Simple "Yes/No" helpers
+  const isAdmin = role === 'admin';
+  const isLabAssistant = role === 'lab_assistant';
+  const isModerator = role === 'moderator';
+  const isStudent = role === 'student';
 
-    const updateRole = (newRole) => {
-        setRole(newRole)
-        storage.setRole(newRole)
-    }
+  // The function you can use in your HTML
+  // Example: hasRole(['admin', 'moderator'])
+  const hasRole = (rolesArray) => rolesArray.includes(role);
 
-    const hasRole = (allowedRoles = []) => {
-        const res = allowedRoles.includes(role)
-        return res
-    }
+  return (
+    <RoleContext.Provider value={{ role, isAdmin, isModerator, hasRole , isLabAssistant, isStudent}}>
+      {children}
+    </RoleContext.Provider>
+  );
+};
 
-    return (
-        <RoleContext.Provider value={{ role, updateRole, hasRole }}>
-            {children}
-        </RoleContext.Provider>
-    )
-}
-
-export const useRole = () => useContext(RoleContext)
+export const useRole = () => useContext(RoleContext);

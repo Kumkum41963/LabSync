@@ -14,6 +14,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
   const menuItems = [
     { label: "Dashboard", path: "/", icon: Home },
     { label: "Tickets", path: "/tickets", icon: Ticket },
+    // { label: "Inventory", path: "/inventory", icon: Inventory },
     { label: "Notices", path: "/notices", icon: Bell },
     { label: "Settings", path: "/settings", icon: Settings },
   ];
