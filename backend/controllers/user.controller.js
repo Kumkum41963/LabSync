@@ -188,6 +188,7 @@ export const logout = async (req, res) => {
 export const updateSkills = async (req, res) => {
   try {
     const { targetId } = req.params;
+    console.log('body:', req.body);
     const { skills } = req.body;
 
     if (req.user.role !== "admin" && req.user.id !== targetId) {
@@ -211,20 +212,24 @@ export const updateSkills = async (req, res) => {
 // update the role as we received from the req
 export const updateRoles = async (req, res) => {
   try {
-    const { targetId } = req.params;
+    const { id } = req.params;
+    console.log('id from params:', id)
     const { role } = req.body;
 
-    if (req.user.role !== "admin" || req.user.id !== "lab_assistant") {
+    // if not admin or lab then not allowed
+    if (req.user.role !== "admin"  && req.user.role !== "lab_assistant") {
       return res.status(403).json({ error: "Only admins or lab assistants can change roles" });
     }
 
-    const user = await User.findByIdAndUpdate(targetId, { role }, { new: true }).select("-password");
+    const user = await User.findByIdAndUpdate(id, { role }, { new: true }).select("-password");
     
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    res.status(200).json({ message: "Role updated", user });
+    console.log('User after role updation:', user);
+
+    return res.status(200).json({ message: "Role updated", user });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };
 

@@ -39,12 +39,18 @@ export const authorizedRoles = (...roles) => {
     try {
         // spread the current role into an array named roles
         return (req, res, next) => {
+            console.log("👉 RAW USER:", req.user);
+            console.log("👉 USER ROLE:", req.user?.role);
+            console.log("👉 TYPE:", typeof req.user?.role);
             const userRole = req.user?.role.toLowerCase(); // get the actual role from users req
             const allowedRoles = roles.map(r => r.toLowerCase()); // convert the allowed roles as passed to middleware into lowercase and keep in allowedRoles
             // match if access is allowed
             if (!allowedRoles.includes(userRole)) {
+                console.log("❌ ROLE NOT ALLOWED");
                 return res.status(403).json({ message: "Access denied. User Role not allowed." })
             }
+
+            console.log("✅ ROLE ALLOWED");
             next()
         }
     } catch (error) {
@@ -53,5 +59,5 @@ export const authorizedRoles = (...roles) => {
     }
 }
 
-// (...) spread operator in js accepts any no. of paras and bundles em into an array named roles
+// (...) spread operator in js accepts any no. of paras and bundles em into an array named roles (name designated)
 

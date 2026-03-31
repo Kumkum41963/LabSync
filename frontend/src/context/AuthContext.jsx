@@ -88,6 +88,7 @@ export const AuthProvider = ({ children }) => {
       if (res.data?.user && currentUser?.id === targetId) {
         saveSession({ user: res.data.user });
       }
+      console.log('role updated by server')
       return res.data;
     } catch (err) {
       console.log('Error in updating role:', err.message);
@@ -112,17 +113,29 @@ export const AuthProvider = ({ children }) => {
   const fetchAllUsers = async () => {
     try {
       const res = await api.auth.getAllUsers();
-      setUsers(res.data);
+      setUsers(res.data.users);
+      console.log('All users fetched successfully', res.data.users)
     } catch (err) {
       console.error("Failed to fetch users", err.message);
     }
   };
+
+  useEffect(() => {
+    // if the currentUser exists i.e authorized then fetch all users 
+    if (currentUser && users.length === 0) { // no fetch done already
+      console.log('Initiating users fetching')
+      fetchAllUsers();
+    } else {
+      setUsers([]);
+    }
+  }, [currentUser]);
 
   return (
     // Everything inside "value" is accessible by other components
     // that use the useAuthContext() hook below.
     <AuthContext.Provider
       value={{
+        users,
         currentUser,
         isLoadingAuth,
         handleLogin,

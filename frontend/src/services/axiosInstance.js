@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { storage } from './storage';
 
-// Abstracted axios instace with baseURL 
+// Abstracted axios instance with baseURL 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:3000/api",
     withCredentials: true,
@@ -30,7 +30,7 @@ axiosInstance.interceptors.response.use(
         return response;
     },
     (error) => {
-        console.error("[Axios Error]", error.response?.status, error.message);
+        console.log("[Axios Error]",  error.message);
         return Promise.reject(error);
     }
 )
