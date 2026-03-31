@@ -84,11 +84,23 @@ export const AuthProvider = ({ children }) => {
   const handleUpdateRole = async (targetId, newRole) => {
     try {
       const res = await api.auth.updateRole(targetId, newRole);
-      // If I edited myself, sync my local state
-      if (res.data?.user && currentUser?.id === targetId) {
-        saveSession({ user: res.data.user });
+      const updatedUser = res.data.user;
+
+      console.log('Role update data', updatedUser);
+
+      setUsers(prev =>
+        prev.map(u =>
+          (u.id === targetId)
+            ? updatedUser
+            : u
+        )
+      );
+
+      // update currentUser in the localstorage or session too if it's me (cuurentUser)
+      if (currentUser?.id === targetId) {
+        saveSession({ user: updatedUser });
       }
-      console.log('role updated by server')
+
       return res.data;
     } catch (err) {
       console.log('Error in updating role:', err.message);
