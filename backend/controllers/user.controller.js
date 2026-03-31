@@ -187,7 +187,7 @@ export const logout = async (req, res) => {
 // update the skills as we received from the req
 export const updateSkills = async (req, res) => {
   try {
-    const { targetId } = req.params;
+    const { id } = req.params;
     console.log('body:', req.body);
     const { skills } = req.body;
 
@@ -195,14 +195,13 @@ export const updateSkills = async (req, res) => {
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    const user = await User.findByIdAndUpdate(targetId, { skills }, { new: true }).select("-password");
+    const user = await User.findByIdAndUpdate(id, { skills }, { new: true }).select("-password");
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Consistent Key: "user"
-    res.status(200).json({ message: "Skills updated", user }); 
+    return res.status(200).json({ message: "Skills updated", user }); 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return  res.status(500).json({ error: error.message });
   }
 };
 

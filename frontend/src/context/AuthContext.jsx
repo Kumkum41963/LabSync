@@ -108,12 +108,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const handleUpdateSkills = async (targetId, newSkills) => {
+  const handleUpdateSkills = async (targetId, newSkills=[]) => {
     try {
       const res = await api.auth.updateSkills(targetId, newSkills);
+      const skilledUser = res.data.user;
+
+      console.log('Role update data', skilledUser);
+
+      setUsers(prev =>
+        prev.map(u =>
+          (u.id === targetId)
+            ? skilledUser
+            : u
+        )
+      );
+
       // If I edited myself, sync my local state
       if (res.data?.user && currentUser?.id === targetId) {
-        saveSession({ user: res.data.user });
+        saveSession({ user: skilledUser });
       }
       return res.data;
     } catch (err) {
