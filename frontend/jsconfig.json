@@ -1,7 +1,6 @@
-// Clean project structure
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": ".", // Add this line
     "paths": {
       "@/*": ["src/*"]
     }

@@ -25,7 +25,7 @@ const TicketList = ({ tickets }) => {
 
   // CARD LIST VIEW (existing)
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {tickets.map((ticket) => (
         <TicketCard key={ticket._id} ticket={ticket} />
       ))}

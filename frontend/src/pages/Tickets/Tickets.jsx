@@ -26,7 +26,7 @@ const Tickets = () => {
   }, [params]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 lg:p-8 space-y-6">
+    <div className="min-h-screen bg-background text-foreground p-3 lg:p-3 space-y-2">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -41,7 +41,7 @@ const Tickets = () => {
       </div>
 
       {/* Filters + List */}
-      <div className="glass-panel bg-card border border-border rounded-lg shadow-sm p-5 space-y-6">
+      <div className="glass-panel bg-card border border-border rounded-2xl shadow-sm p-4 space-y-6">
         {/* Search and Filter */}
         <TicketsHeader params={params} setParams={setParams} />
 

@@ -1,4 +1,5 @@
 import { inngest } from "../inngest/client.js";
+import { fireEvent } from "../inngest/fireEvent.js";
 import Ticket from "../models/ticket.model.js";
 import User from "../models/user.model.js";
 
@@ -57,21 +58,9 @@ export const createTicket = async (req, res) => {
     console.log("Ticket created in DB:", newTicket);
 
     // Send event to Inngest for background AI processing
-    try {
-      await inngest.send({
-        name: "ticket/created",
-        data: {
-          ticketId: newTicket._id.toString(),
-          title,
-          description,
-          tags,
-          createdBy: req.user._id.toString(),
-        },
-      });
-      console.log("🚀 Inngest event sent for ticket creation");
-    } catch (error) {
-      console.error("⚠️ Inngest event failed:", error.message);
-    }
+    await fireEvent("ticket/created", { ticketId: newTicket._id.toString() })
+    console.log("🚀 Inngest event sent for ticket creation");
+
 
     return res.status(201).json({
       message:
@@ -326,15 +315,9 @@ export const updateTicketById = async (req, res) => {
       changedFields.some(f => aiRelevant.includes(f));
 
     if (studentEdited) {
-      try {
-        await inngest.send({
-          name: "ticket/updated",
-          data: { ticketId: ticket._id.toString() },
-        });
-        console.log("🧠 AI reprocessing triggered");
-      } catch (e) {
-        console.warn("⚠️ Inngest update event failed:", e.message);
-      }
+      await fireEvent("ticket/updated", { ticketId: ticket._id.toString(), changedFields })
+      console.log("🧠 Inngest reprocessing triggered after student edits");
+
     }
 
     return res.status(200).json({

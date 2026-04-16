@@ -13,6 +13,7 @@ import { serve } from "inngest/express";
 import { inngest } from "./inngest/client.js";
 import { onUserSignup } from "./inngest/functions/on-signup.js";
 import { onTicketCreated } from "./inngest/functions/on-ticket-create.js";
+import { onTicketUpdated } from "./inngest/functions/on-ticket-update.js";
 
 const app = express();
 
@@ -27,12 +28,12 @@ app.use(express.json());
 app.use("/api/auth", userRoutes);
 app.use("/api/tickets", ticketRoutes);
 
-// mount inngest on express 
+// Step 2: mount inngest on express 
 app.use(
   "/api/inngest",
   serve({
     client: inngest,
-    functions: [onTicketCreated, onUserSignup],
+    functions: [onTicketCreated, onUserSignup, onTicketUpdated],
   })
 );
 

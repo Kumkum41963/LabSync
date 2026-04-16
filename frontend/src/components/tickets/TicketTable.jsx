@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Table,
@@ -9,30 +9,47 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ExternalLink, UserPlus } from "lucide-react";
+import { useRole } from "@/context/RoleContext";
+import ModeratorSelectionModal from "./ModeratorSelectionModal";
 
-const TicketTable = ({ tickets, role }) => {
+const TicketTable = ({ tickets}) => {
     const navigate = useNavigate();
+    const {isAdmin, isModerator, isLabAssistant} = useRole();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedTicket, setSelectedTicket] = useState(null);
 
-    // Helper variables for cleaner code
-    const isAdmin = role === "admin";
-    const isMod = role === "moderator";
-    const isLab = role === "lab_assistant";
+    const handleOpenModal = (ticket) => {
+        setSelectedTicket(ticket);
+        setIsModalOpen(true);
+    };
+
+    const handleSelectModerator = (moderatorId) => {
+        if (onAssignModerator && selectedTicket) {
+            onAssignModerator(selectedTicket._id, moderatorId);
+        }
+        setIsModalOpen(false);
+    };
 
     return (
         <div className="rounded-lg border border-border bg-card/50 backdrop-blur-sm overflow-x-auto w-full">
             <Table className="min-w-[700px] md:min-w-full">
+                {/* Table Headers */}
                 <TableHeader className="bg-muted/50">
                     <TableRow>
-                        <TableHead className="w-[200px] md:w-[300px]">Title</TableHead>
+                        <TableHead>Title</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Priority</TableHead>
-                        <TableHead className="hidden sm:table-cell">Tags</TableHead>
+                        
+                        {/* New Dedicated Column for Navigation */}
+                        <TableHead className="text-center">Ticket Details</TableHead>
 
-                        {/* Admin sees both. Mod ONLY sees Assigned By. */}
-                        {(isAdmin || isMod) && <TableHead>Assigned By</TableHead>}
-
-                        {/* Admin sees both. Lab ONLY sees Assigned To. */}
-                        {(isAdmin || isLab) && <TableHead>Assigned To</TableHead>}
+                        {(isAdmin || isModerator) && <TableHead>Assigned By</TableHead>}
+                        {(isAdmin || isLabAssistant) && <TableHead>Assigned To</TableHead>}
+                        
+                        {/* Assignment Column for Admins and Lab Assitants*/}
+                        {(isAdmin || isLabAssistant) &&  <TableHead className="text-center">Assign To</TableHead>}
 
                         <TableHead className="text-right hidden md:table-cell">Created By</TableHead>
                     </TableRow>
@@ -40,15 +57,9 @@ const TicketTable = ({ tickets, role }) => {
 
                 <TableBody>
                     {tickets.map((ticket) => (
-                        <TableRow
-                            key={ticket._id}
-                            className="cursor-pointer hover:bg-primary/5 transition-colors group"
-                            onClick={() => navigate(`/tickets/${ticket._id}`)}
-                        >
-                            <TableCell className="font-medium text-foreground">
-                                <div className="truncate max-w-[150px] md:max-w-none">
-                                    {ticket.title}
-                                </div>
+                        <TableRow key={ticket._id} className="hover:bg-primary/5 transition-colors">
+                            <TableCell className="font-medium text-foreground max-w-[200px] truncate">
+                                {ticket.title}
                             </TableCell>
 
                             <TableCell>
@@ -63,27 +74,44 @@ const TicketTable = ({ tickets, role }) => {
                                 </Badge>
                             </TableCell>
 
-                            <TableCell className="hidden sm:table-cell">
-                                <div className="flex flex-wrap gap-1">
-                                    {ticket.tags?.slice(0, 1).map((tag) => (
-                                        <Badge key={tag} variant="outline" className="text-xs px-2 py-1">
-                                            {tag}
-                                        </Badge>
-                                    ))}
-                                </div>
+                            {/* Navigation Column with 'Live' Style Icon */}
+                            <TableCell className="text-center">
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    onClick={() => navigate(`/tickets/${ticket._id}`)}
+                                    className="hover:bg-blue-500/10 text-blue-500"
+                                >
+                                    <ExternalLink className="h-4 w-4 mr-2" />
+                                    View Live
+                                </Button>
                             </TableCell>
 
-                            {/* Data Logic: Assigned By (Visible to Admin & Mod) */}
-                            {(isAdmin || isMod) && (
+                            {(isAdmin || isModerator) && (
                                 <TableCell className="text-muted-foreground text-xs">
                                     {ticket.assignedByLabAssistant?.name || "—"}
                                 </TableCell>
                             )}
 
-                            {/* Data Logic: Assigned To (Visible to Admin & Lab) */}
-                            {(isAdmin || isLab) && (
+                            {(isAdmin || isLabAssistant) && (
                                 <TableCell className="text-muted-foreground text-xs">
                                     {ticket.assignedModerator?.name || "Unassigned"}
+                                </TableCell>
+                            )}
+
+                            {/* Assign To Column */}
+                            {(isAdmin || isLabAssistant ) && (
+                                <TableCell className="text-center">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        // when clicked a modal shall open to which current ticket details will be passed as prop
+                                        onClick={() => handleOpenModal(ticket)}
+                                        className="h-8 border-dashed border-primary/50 hover:border-primary text-primary"
+                                    >
+                                        <UserPlus className="h-3.5 w-3.5 mr-1" />
+                                        {ticket.assignedModerator ? "Reassign" : "Assign"}
+                                    </Button>
                                 </TableCell>
                             )}
 
@@ -94,6 +122,8 @@ const TicketTable = ({ tickets, role }) => {
                     ))}
                 </TableBody>
             </Table>
+
+           <ModeratorSelectionModal/>
         </div>
     );
 };
