@@ -325,6 +325,7 @@ export const updateTicketById = async (req, res) => {
       changedFields,
       updatedTicket,
     });
+    
   } catch (error) {
     console.error("❌ Error updating ticket:", error.message);
     return res.status(500).json({ message: "Internal Server Error" });

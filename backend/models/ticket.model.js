@@ -48,6 +48,14 @@ const ticketSchema = new mongoose.Schema(
       index: true, // filter for moderator dashboards
     },
 
+    suggestedModerators: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null,
+      }
+    ],
+
     assignedByLabAssistant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
