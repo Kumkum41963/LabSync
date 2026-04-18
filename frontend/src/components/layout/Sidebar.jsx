@@ -19,9 +19,9 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     { label: "Settings", path: "/settings", icon: Settings },
   ];
 
-  if (currentUser?.role === "admin") {
-    menuItems.push({ label: "Admin", path: "/admin", icon: Shield });
-  }
+  // if (currentUser?.role === "admin") {
+  //   menuItems.push({ label: "Admin", path: "/admin", icon: Shield });
+  // }
 
   return (
     <TooltipProvider delayDuration={0}>

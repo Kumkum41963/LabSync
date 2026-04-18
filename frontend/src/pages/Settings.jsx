@@ -3,7 +3,7 @@ import { useRole } from '@/context/RoleContext';
 import Profile from '@/components/auth/Profile';
 import ProfileList from '@/components/auth/ProfileList';
 
-const Setting = () => {
+const Settings = () => {
   const { isAdmin, isModerator, isLabAssistant, isStudent } = useRole();
 
   if (isStudent) {
@@ -37,4 +37,6 @@ const Setting = () => {
   );
 };
 
-export default Setting;
+export default Settings;
+
+

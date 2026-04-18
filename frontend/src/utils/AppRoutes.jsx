@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import Dashboard from "@/pages/Dashboard";
+import Dashboard from "@/pages/Dashboards/Dashboard";
 import CheckAuth from "@/utils/CheckAuth";
 import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "@/pages/NotFound";
@@ -12,10 +12,10 @@ import CreateTicket from "@/pages/Tickets/CreateTicket";
 import UpdateTicket from "@/pages/Tickets/UpdateTicket";
 
 import Profile from "@/components/auth/Profile";
-import Settings from "@/pages/Settings";
 import Notices from "@/pages/Notices";
 import Applications from "@/pages/Applications";
 import Inventory from "@/pages/Inventory";
+import Settings from "@/pages/Settings";
 
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
