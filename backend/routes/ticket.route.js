@@ -12,6 +12,7 @@ import { authenticate, authorizedRoles } from "../middlewares/auth.js";
 const router = express.Router();
 
 router.post("/", authenticate, authorizedRoles("student", "admin"), createTicket);
+// router.post("/", createTicket);
 router.get("/", authenticate, getTickets);
 router.get("/:id", authenticate, getTicketById);
 router.put("/:id", authenticate, updateTicketById);

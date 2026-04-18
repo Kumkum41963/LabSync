@@ -32,10 +32,9 @@ export const onTicketCreated = inngest.createFunction(
     console.log("ticket fetched:", ticket._id.toString());
 
     // Call the agent to analyze the ticket basically run the prompt over it
-    const aiResult = await step.run("analyze-ticket", async () => {
-      return await analyzeTicket(ticket);
-    });
-
+    // NO manual step.run here. Otherwise with analyzeTicket a nested loop will form thus.
+    console.log("Calling the agent...");
+    const aiResult = await analyzeTicket(ticket);
     console.log("aiResult done:", aiResult);
 
     // Suggest moderators to ticket based on the related skills

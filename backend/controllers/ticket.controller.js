@@ -6,7 +6,7 @@ import User from "../models/user.model.js";
 // createTicket: Student or Admin raises a new ticket
 export const createTicket = async (req, res) => {
   try {
-    const user = req.user;
+    const user = req.user; // 
 
     // Defensive role check
     if (user.role !== "student" && user.role !== "admin") {
@@ -34,14 +34,14 @@ export const createTicket = async (req, res) => {
 
     // Validate inputs
     if (!title || !description || !tags || tags.length === 0) {
-      console.warn("⚠️ Missing required ticket fields");
+      console.log("⚠️ Missing required ticket fields");
       return res.status(400).json({
         message: "Title, description, and at least one tag are required",
       });
     }
 
     if (!title || !description) {
-      console.warn("⚠️ Missing required ticket fields");
+      console.log("⚠️ Missing required ticket fields");
       return res.status(400).json({
         message: "Title, description are required",
       });
@@ -58,7 +58,7 @@ export const createTicket = async (req, res) => {
     console.log("Ticket created in DB:", newTicket);
 
     // Send event to Inngest for background AI processing
-    await fireEvent("ticket/created", { ticketId: newTicket._id.toString() })
+    await fireEvent("ticket/created",{ ticketId: newTicket._id.toString() })
     console.log("🚀 Inngest event sent for ticket creation");
 
 
@@ -169,7 +169,7 @@ export const getTickets = async (req, res) => {
       `✅ ${tickets.length} tickets fetched for ${user.name} with role ${user.role}`
     );
 
-    console.log("All fetched tickets:", tickets);
+    // console.log("All fetched tickets:", tickets);
 
     return res.status(200).json({
       message: "Tickets fetched successfully 🟢",

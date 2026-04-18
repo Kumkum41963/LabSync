@@ -2,12 +2,13 @@ import { createAgent, gemini } from "@inngest/agent-kit";
 import { SYSTEM_PROMPT, buildUserPrompt } from "../utils/prompts.js";
 
 export const analyzeTicket = async (ticket) => {
-  console.log("analyzeTicket started");
+  console.log("!!! analyzeTicket started !!!");
+  console.log('AI API key:', process.env.GEMINI_API_KEY)
 
   // Create the agent 
   const agent = createAgent({
     model: gemini({
-      model: "gemini-1.5-flash-8b",
+      model: "gemini-2.0-flash",
       apiKey: process.env.GEMINI_API_KEY,
     }),
     name: "Embedded Systems Ticket Triage Assistant",
