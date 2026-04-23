@@ -118,5 +118,5 @@ ticketSchema.index({ priority: 1, createdAt: -1 });
 ticketSchema.index({ assignedModerator: 1, status: 1, priority: 1 });
 
 
-const Ticket = mongoose.model("Ticket", ticketSchema);
+const Ticket = mongoose.models.Ticket || mongoose.model("Ticket", ticketSchema);
 export default Ticket;

@@ -42,5 +42,5 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ role: 1, skills: 1 })// Often used: find moderator with specific skills
 userSchema.index({ name: "text", email: "text" }); //searching users by name/email (admin search)
 
-const User = mongoose.model("User", userSchema);
+const User =  mongoose.models.User || mongoose.model("User", userSchema);
 export default User;
