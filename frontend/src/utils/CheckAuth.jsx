@@ -5,15 +5,21 @@ import Loader from "@/components/ui/Loader";
 function CheckAuth({ children, allowedRoles }) {
   const location = useLocation();
 
-  const { isAuthenticated, isLoadingAuth, currentUser } = useAuth();
+  const { isAuthenticated, currentUser } = useAuth();
+
+  // const { isAuthenticated, isLoadingAuth, currentUser } = useAuth();
 
   // loading state: when no auth yet determined
-  if (isLoadingAuth) {
-    return <Loader/>
-  }
+  // if (isLoadingAuth) {
+  //   return <Loader/>
+  // }
 
   // authenticated check 
-  if (!isAuthenticated && !isLoadingAuth && !currentUser) {
+  // if (!isAuthenticated && !isLoadingAuth && !currentUser) {
+  //   return <Navigate to="/login" state={{ from: location }} replace />;
+  // }
+
+   if (!isAuthenticated && !currentUser) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
