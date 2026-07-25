@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
 
   // Store the current user in state if exists already
   const [currentUser, setCurrentUser] = useState(storage.getUser());
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(false); // true when auth is in progress, false when done 
   const [users, setUsers] = useState([]); // for a list of all users 
 
   const saveSession = (data) => {
