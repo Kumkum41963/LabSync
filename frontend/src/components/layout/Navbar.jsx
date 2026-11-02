@@ -31,7 +31,7 @@ const Navbar = () => {
             </div>
             <Avatar className="h-9 w-9 border border-primary/20">
               <AvatarFallback className="bg-primary/10 text-primary">
-                {currentUser.name.charAt(0).toUpperCase()}
+                {currentUser.email.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>

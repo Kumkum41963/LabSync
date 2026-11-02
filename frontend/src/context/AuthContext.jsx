@@ -12,6 +12,10 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(storage.getUser());
   // const [isLoadingAuth, setIsLoadingAuth] = useState(false); // true when auth is in progress, false when done 
   const [users, setUsers] = useState([]); // for a list of all users 
+  const [isAuthenticated, setIsAuthenticated] = useState(!!currentUser);
+
+  console.log("[Auth] Current User: ", currentUser)
+  console.log("[Auth] Auth Status: ", isAuthenticated ? "Authenticated" : "Not Authenticated")
 
   const saveSession = (data) => {
     // Use the new token if provided, otherwise stick with the one we have
@@ -180,3 +184,7 @@ export const AuthProvider = ({ children }) => {
 // This is a convenience function so that components can call useAuthContext()
 // instead of useContext(AuthContext) directly.
 export const useAuth = () => useContext(AuthContext);
+
+
+// logout
+// no tickets found 
