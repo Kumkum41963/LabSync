@@ -58,6 +58,7 @@ export const createTicket = async (req, res) => {
     console.log("Ticket created in DB:", newTicket);
 
     // Send event to Inngest for background AI processing
+    console.log("Sending Inngest event for ticket creation:")
     await fireEvent("ticket/created",{ ticketId: newTicket._id.toString() })
     console.log("🚀 Inngest event sent for ticket creation");
 
