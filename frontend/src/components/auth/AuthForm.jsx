@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-// Get the type of form (login/signup) from props
 const AuthForm = ({ type }) => {
   const navigate = useNavigate();
   const { handleLogin, handleSignup } = useAuth();
@@ -19,28 +18,21 @@ const AuthForm = ({ type }) => {
   });
 
   const [loading, setLoading] = useState(false);
+  const isLogin = type === "login";
 
-  const isLogin = (type === "login");
-
-  // Handle input changes
   const handleChange = (e) => {
-    // chnage or append the form data or state to state -> form (literally)
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       if (isLogin) {
-        // send an object to server for destructuring
-        // form has got the data from the unput fields
         await handleLogin(formData);
-        navigate("/"); // redirect to home/dashboard after login
+        navigate("/");
       } else {
-        // sent the entire form data 
         await handleSignup(formData);
         navigate("/");
       }
@@ -51,7 +43,6 @@ const AuthForm = ({ type }) => {
     }
   };
 
-  // roles arr. disntictified
   const roles = [
     { value: "student", label: "Student" },
     { value: "moderator", label: "Moderator" },
@@ -60,17 +51,18 @@ const AuthForm = ({ type }) => {
   ];
 
   return (
-    <div className="auth-page">
-      <Card className="auth-card text-white">
-        <CardContent className="p-8">
-          <h2 className="auth-heading">
+    // Full width of its grid column, centered flex layout
+    <div className="w-full flex justify-center items-center p-6 md:p-12">
+      <Card className="w-full max-w-md bg-transparent border-none text-white shadow-none">
+        <CardContent className="p-0 space-y-6">
+          <h2 className="text-3xl font-bold tracking-tight text-white mb-6">
             {isLogin ? "Login" : "Sign Up"}
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div>
-                <Label htmlFor="name" className="auth-label">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium text-slate-300 gap-1">
                   Name
                 </Label>
                 <Input
@@ -79,14 +71,14 @@ const AuthForm = ({ type }) => {
                   placeholder="eg. admin"
                   value={formData.name}
                   onChange={handleChange}
-                  className="auth-input"
-                  required
+                  className="bg-slate-900/60 border-slate-700 text-white placeholder:text-slate-500 focus:border-cyan-500"
+                  required={!isLogin}
                 />
               </div>
             )}
 
-            <div>
-              <Label htmlFor="email" className="auth-label">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium text-slate-300">
                 Email
               </Label>
               <Input
@@ -96,13 +88,13 @@ const AuthForm = ({ type }) => {
                 placeholder="eg. admin@gmail.com"
                 value={formData.email}
                 onChange={handleChange}
-                className="auth-input"
+                className="bg-slate-900/60 border-slate-700 text-white placeholder:text-slate-500 focus:border-cyan-500"
                 required
               />
             </div>
 
-            <div>
-              <Label htmlFor="password" className="auth-label">
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium text-slate-300">
                 Password
               </Label>
               <Input
@@ -112,50 +104,57 @@ const AuthForm = ({ type }) => {
                 placeholder="eg. admin@123"
                 value={formData.password}
                 onChange={handleChange}
-                className="auth-input"
+                className="bg-slate-900/60 border-slate-700 text-white placeholder:text-slate-500 focus:border-cyan-500"
                 required
               />
             </div>
 
-            <div>
-              <Label htmlFor="role" className="auth-label">
-                Role
-              </Label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="auth-select"
-                required
-              >
-                <option value="" disabled>
-                  Select your role
-                </option>
-                {roles.map((role) => (
-                  <option value={role.value} key={role.value}>
-                    {role.label}
+            {/* Role selection only on Sign Up */}
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="role" className="text-sm font-medium text-slate-300">
+                  Role
+                </Label>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="w-full h-10 px-3 rounded-md bg-slate-900/60 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  required={!isLogin}
+                >
+                  <option value="" disabled className="bg-slate-900 text-slate-400">
+                    Select your role
                   </option>
-                ))}
-              </select>
-            </div>
+                  {roles.map((role) => (
+                    <option value={role.value} key={role.value} className="bg-slate-900 text-white">
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
-            <Button type="submit" disabled={loading} className="auth-btn">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-4 bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-semibold py-2 px-4 rounded-md transition-all duration-200"
+            >
               {loading
                 ? isLogin
                   ? "Logging in..."
                   : "Signing up..."
                 : isLogin
-                  ? "Login"
-                  : "Sign Up"}
+                ? "Login"
+                : "Sign Up"}
             </Button>
           </form>
 
-          <p className="auth-link-text">
+          <p className="text-sm text-slate-400 text-center mt-4">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <Link
               to={isLogin ? "/signup" : "/login"}
-              className="auth-link"
+              className="text-cyan-400 hover:underline font-medium ml-1"
             >
               {isLogin ? "Sign up" : "Login"}
             </Link>
