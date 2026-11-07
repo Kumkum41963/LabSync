@@ -6,10 +6,9 @@ import { useRole } from '@/context/RoleContext';
 const Profile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { users, currentUser, handleUpdateRole, handleUpdateSkills } = useAuth();
+  const { users, currentUser, handleUpdateRole, handleUpdateSkills, handleRemoveSkill } = useAuth();
   const { isAdmin, isModerator, isLabAssistant } = useRole();
 
-  // Find user based on URL ID or current session
   const user = useMemo(() => {
     return id ? users?.find(u => u.id === id || u._id === id) : currentUser;
   }, [id, users, currentUser]);
@@ -17,7 +16,6 @@ const Profile = () => {
   const [newRole, setNewRole] = useState(user?.role || '');
   const [skillInput, setSkillInput] = useState('');
 
-  // Keep role dropdown in sync with global state
   useEffect(() => {
     if (user?.role) {
       setNewRole(user.role);
@@ -29,11 +27,11 @@ const Profile = () => {
   const handleRoleChange = async (e) => {
     e.preventDefault();
     await handleUpdateRole(user.id || user._id, newRole);
-    console.log('Role updated successfully');
   };
 
   const handleAddSkill = async (e) => {
     e.preventDefault();
+    console.log("Adding Skills:", skillInput)
     if (!skillInput.trim()) return;
     
     const skillsArray = skillInput
@@ -42,13 +40,18 @@ const Profile = () => {
       .filter(s => s !== '');
 
     await handleUpdateSkills(user.id || user._id, skillsArray);
+    console.log('Skills added:', skillsArray)
     setSkillInput('');
-    console.log('Skills updated successfully');
+  };
+
+  const handleDeleteSkill = async (skillToRemove) => {
+    console.log('Removing Skill:', skillToRemove);
+    console.log('User ID:', user.id || user._id);
+    await handleRemoveSkill(user.id || user._id, skillToRemove);
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Navigation */}
       {(isAdmin || isLabAssistant) && (
         <div className="mb-2">
           <button 
@@ -61,29 +64,32 @@ const Profile = () => {
         </div>
       )}
 
-      {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border/30 pb-6">
         <div>
           <h1 className="auth-heading text-left capitalize mb-0">Profile: {user.name}</h1>
           <p className="text-accent italic text-sm">{user.email}</p>
         </div>
         <div className="text-left sm:text-right">
-          <h3 className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Designation</h3>
+          <h3 className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Current Designation</h3>
           <p className="text-2xl font-light tracking-tight text-secondary capitalize">
             {user.role?.replace('_', ' ')}
           </p>
         </div>
       </div>
 
-      {/* Row 1: Role Management (Conditional) */}
       {(isAdmin || isLabAssistant) && (
-        <div className="glass-panel p-6 rounded-2xl border-glass shadow-lg">
-          <h3 className="text-sm text-muted-foreground uppercase tracking-widest mb-4">Administrative Controls</h3>
+        <div className="glass-panel p-6 rounded-2xl border border-primary/20 shadow-lg bg-primary/5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary inline-block"></span>
+              Administrative Controls
+            </h3>
+          </div>
           <form onSubmit={handleRoleChange} className="flex flex-col sm:flex-row items-end gap-4">
             <div className="flex-1 w-full">
-              <label className="auth-label">Update User Role</label>
+              <label className="auth-label text-xs mb-1.5 block">Assign New User Role</label>
               <select 
-                className="auth-select w-full" 
+                className="auth-select w-full bg-background/80 border-border focus:ring-2 focus:ring-primary/40 rounded-xl" 
                 value={newRole} 
                 onChange={(e) => setNewRole(e.target.value)}
               >
@@ -93,26 +99,37 @@ const Profile = () => {
                 <option value="lab_assistant">Lab Assistant</option>
               </select>
             </div>
-            <button type="submit" className="auth-btn mt-0 w-full sm:w-auto px-8">
+            <button type="submit" className="auth-btn mt-0 w-full sm:w-auto px-8 py-2.5 bg-primary text-primary-foreground font-medium rounded-xl">
               Save Role Change
             </button>
           </form>
         </div>
       )}
 
-      {/* Row 2: Skills Management */}
-      <div className="glass-panel p-6 rounded-2xl border-glass shadow-lg space-y-6">
+      {/* Skills Management Section */}
+      <div className="glass-panel p-6 rounded-2xl border border-border/60 shadow-lg space-y-6">
         <div>
-          <h3 className="text-sm text-muted-foreground uppercase tracking-widest mb-4">Skills & Technologies</h3>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm text-muted-foreground uppercase tracking-widest">Skills & Technologies</h3>
+          </div>
+
+          <div className="flex flex-wrap gap-2.5">
             {user?.skills?.length > 0 ? (
               user.skills.map((skill, index) => (
-                <span 
+                <div 
                   key={index} 
-                  className="px-4 py-1.5 bg-black/40 border border-border rounded-lg text-xs capitalize hover:border-accent transition-colors"
+                  className="group relative inline-flex items-center gap-2 pl-3.5 pr-2 py-1.5 bg-background/60 border border-border/80 rounded-xl text-xs capitalize font-medium hover:border-accent transition-all shadow-sm"
                 >
-                  {skill}
-                </span>
+                  <span>{skill}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteSkill(skill)}
+                    className="w-4 h-4 rounded-full bg-muted-foreground/20 text-muted-foreground hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors text-[10px]"
+                    title="Remove skill"
+                  >
+                    ×
+                  </button>
+                </div>
               ))
             ) : (
               <p className="text-muted-foreground text-xs italic">No skills added yet.</p>
@@ -123,34 +140,25 @@ const Profile = () => {
         {/* Add Skill Input Row */}
         <div className="pt-6 border-t border-border/50">
           <form onSubmit={handleAddSkill} className="space-y-3">
-            <label className="auth-label !ml-0">Add New Skills</label>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <label className="auth-label !ml-0 text-xs font-medium">Add Skill Badges</label>
+            <div className="flex flex-col sm:flex-row items-center gap-3">
               <input 
                 type="text" 
-                className="auth-input flex-1" 
+                className="auth-input w-full pl-4 pr-4 py-2.5 bg-background/50 border-border/70 rounded-xl focus:bg-background focus:ring-2 focus:ring-accent/40 focus:border-accent transition-all text-sm" 
                 placeholder="Comma separated (e.g. React, Node, Python...)" 
                 value={skillInput} 
                 onChange={(e) => setSkillInput(e.target.value)} 
               />
-              <button type="submit" className="auth-btn mt-0 w-full sm:w-auto px-10">
-                Add Skills
+              <button 
+                type="submit" 
+                className="w-full sm:w-auto px-6 py-2.5 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                <span>+ Add Skills</span>
               </button>
             </div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-tighter">
-              Tip: Separate multiple skills with a comma
-            </p>
           </form>
         </div>
       </div>
-
-      {/* Row 3: Moderator Info (Only if not Admin/Assistant) */}
-      {isModerator && !isAdmin && !isLabAssistant && (
-        <div className="p-4 text-center border border-dashed border-border rounded-xl">
-          <p className="text-sm text-muted-foreground italic">
-            Note: Role management is restricted to Admins and Lab Assistants.
-          </p>
-        </div>
-      )}
     </div>
   );
 };

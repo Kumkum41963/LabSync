@@ -4,8 +4,11 @@ import Ticket from "../../models/ticket.model.js";
 import { analyzeTicket } from "../../utils/aiAgent.js";
 
 export const onTicketUpdated = inngest.createFunction(
-  { id: "on-ticket-updated", retries: 2 }, // key
-  { event: "ticket/updated" }, // trigerring
+  {
+    id: "on-ticket-updated",
+    retries: 2, // key
+    event: "ticket/updated"
+  }, // trigerring
 
   async ({ event, step }) => {
     // Extract data and id

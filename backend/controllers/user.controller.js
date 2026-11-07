@@ -188,20 +188,62 @@ export const logout = async (req, res) => {
 export const updateSkills = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log('body:', req.body);
+    console.log('body received:', req.body);
     const { skills } = req.body;
+    console.log('skills received:', skills);
 
-    if (req.user.role !== "admin" && req.user.id !== targetId) {
+    // FIX: Change targetId to id
+    if (req.user.role !== "admin" && req.user.id !== id) {
+      console.log('Checking forbidden entry');
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    const user = await User.findByIdAndUpdate(id, { skills }, { new: true }).select("-password");
+    console.log('does it reach here ?');    // Use $addToSet with $each to append unique skills without duplicates
+    const user = await User.findByIdAndUpdate(
+      id,
+      { $addToSet: { skills: { $each: skills } } },
+      { new: true }
+    ).select("-password");
+    console.log('User after skills updation:', user)
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    return res.status(200).json({ message: "Skills updated", user }); 
+    return res.status(200).json({ message: "Skills updated", user });
   } catch (error) {
-    return  res.status(500).json({ error: error.message });
+    console.error("Caught error:", error.message); // This will show you the exact ReferenceError if it happens again
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// Remove Skills 
+// Moderators Faculty Admin - roles allowed 
+// Only owner allowed to do so 
+// Get the user id 
+// Match with the incoming id in params from req
+// Matches - delete else no
+// Get the user from db 
+// remove the skills as we received from the req
+export const removeSkill = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { skillToRemove } = req.body;
+
+    // Middleware already handled authentication & role verification.
+    // Use $pull to remove the specific skill from the array.
+    const user = await User.findByIdAndUpdate(
+      id, 
+      { $pull: { skills: skillToRemove } }, 
+      { new: true }
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json({ message: "Skill removed successfully", user });
+  } catch (error) {
+    console.error("Error removing skill:", error.message);
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -216,12 +258,12 @@ export const updateRoles = async (req, res) => {
     const { role } = req.body;
 
     // if not admin or lab then not allowed
-    if (req.user.role !== "admin"  && req.user.role !== "lab_assistant") {
+    if (req.user.role !== "admin" && req.user.role !== "lab_assistant") {
       return res.status(403).json({ error: "Only admins or lab assistants can change roles" });
     }
 
     const user = await User.findByIdAndUpdate(id, { role }, { new: true }).select("-password");
-    
+
     if (!user) return res.status(404).json({ error: "User not found" });
 
     console.log('User after role updation:', user);
@@ -238,20 +280,20 @@ export const getCurrentUser = async (req, res) => {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ 
-        success: false, 
-        error: "Unauthorized", 
-        message: "User ID missing from request." 
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized",
+        message: "User ID missing from request."
       });
     }
 
     const user = await User.findById(userId).select("-password -__v");
 
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        error: "Not Found", 
-        message: "User profile does not exist in our records." 
+      return res.status(404).json({
+        success: false,
+        error: "Not Found",
+        message: "User profile does not exist in our records."
       });
     }
 
@@ -274,7 +316,7 @@ export const getAllUsers = async (req, res) => {
   try {
     const userId = req.user?.id;
 
-    const users = await User.find({ _id: { $ne: userId } }) 
+    const users = await User.find({ _id: { $ne: userId } })
       .select("-password -__v")
       .sort({ createdAt: -1 })
       .lean();
@@ -282,7 +324,7 @@ export const getAllUsers = async (req, res) => {
     return res.status(200).json({
       success: true,
       count: users.length,
-      users 
+      users
     })
   } catch (error) {
     return res.status(500).json({

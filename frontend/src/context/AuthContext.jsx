@@ -112,28 +112,56 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const handleUpdateSkills = async (targetId, newSkills=[]) => {
+const handleUpdateSkills = async (targetId, newSkills=[]) => {
     try {
       const res = await api.auth.updateSkills(targetId, newSkills);
       const skilledUser = res.data.user;
 
-      console.log('Role update data', skilledUser);
+      console.log('Skills update response:', skilledUser);
 
       setUsers(prev =>
         prev.map(u =>
-          (u.id === targetId)
+          (u.id === targetId || u._id === targetId)
             ? skilledUser
             : u
         )
       );
 
-      // If I edited myself, sync my local state
-      if (res.data?.user && currentUser?.id === targetId) {
+      // CRITICAL: If you updated your own skills, force-update local storage immediately
+      if (currentUser?.id === targetId || currentUser?._id === targetId) {
         saveSession({ user: skilledUser });
+        setCurrentUser(skilledUser); // Forces React state to re-render instantly
       }
       return res.data;
     } catch (err) {
       console.log('Error in updating skills:', err.message);
+      throw err;
+    }
+  };
+
+  const handleRemoveSkill = async (targetId, skillToRemove) => {
+    try {
+      const res = await api.auth.removeSkill(targetId, skillToRemove);
+      const updatedUser = res.data.user;
+
+      console.log('Skill remove response:', updatedUser);
+
+      setUsers(prev =>
+        prev.map(u =>
+          (u.id === targetId || u._id === targetId)
+            ? updatedUser
+            : u
+        )
+      );
+
+      // CRITICAL: Force-update local storage and state for current user
+      if (currentUser?.id === targetId || currentUser?._id === targetId) {
+        saveSession({ user: updatedUser });
+        setCurrentUser(updatedUser); // Forces React state to re-render instantly
+      }
+      return res.data;
+    } catch (err) {
+      console.log('Error in removing skill:', err.message);
       throw err;
     }
   };
@@ -171,6 +199,7 @@ export const AuthProvider = ({ children }) => {
         handleSignup,
         handleUpdateRole,
         handleUpdateSkills,
+        handleRemoveSkill,
         fetchAllUsers,
         isAuthenticated: !!currentUser,
       }}

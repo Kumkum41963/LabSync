@@ -4,8 +4,11 @@ import { inngest } from '../client.js'
 import { sendMail } from "../../utils/mailer.js";
 
 export const onUserSignup = inngest.createFunction(
-    { id: "on-user-signup", retries: 2 }, // key
-    { event: "user/signup" }, // triggerring the event in inngest
+    {
+        id: "on-user-signup",
+        retries: 2, // key
+        event: "user/signup"
+    }, // triggerring the event in inngest
     async ({ event, step }) => {
         try {
             const { email } = event.data
@@ -16,7 +19,7 @@ export const onUserSignup = inngest.createFunction(
                 if (!userObject) {
                     throw new NonRetriableError('User no longer exists in our DB')
                 }
-                console.log('checking what user object is:',userObject)
+                console.log('checking what user object is:', userObject)
                 return userObject // returning things here 
             })
 
@@ -29,7 +32,7 @@ export const onUserSignup = inngest.createFunction(
 
                 await sendMail(user.email, subject, message)
             })
-            
+
             console.log('mail sent successfully!!!')
             return { success: true }
 

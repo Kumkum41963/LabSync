@@ -36,28 +36,28 @@ Authorizable Middleware:
     - Restricts route access based on user roles
 */
 export const authorizedRoles = (...roles) => {
-    try {
-        // spread the current role into an array named roles
-        return (req, res, next) => {
-            console.log("👉 RAW USER:", req.user);
-            console.log("👉 USER ROLE:", req.user?.role);
-            console.log("👉 TYPE:", typeof req.user?.role);
-            const userRole = req.user?.role.toLowerCase(); // get the actual role from users req
-            const allowedRoles = roles.map(r => r.toLowerCase()); // convert the allowed roles as passed to middleware into lowercase and keep in allowedRoles
-            // match if access is allowed
+    return (req, res, next) => {
+        try {
+            if (!req.user || !req.user.role) {
+                console.log("❌ NO USER ROLE FOUND");
+                return res.status(401).json({ message: "Access denied. User data missing." });
+            }
+
+            const userRole = req.user.role.trim().toLowerCase();
+            const allowedRoles = roles.map(r => r.trim().toLowerCase());
+
             if (!allowedRoles.includes(userRole)) {
-                console.log("❌ ROLE NOT ALLOWED");
-                return res.status(403).json({ message: "Access denied. User Role not allowed." })
+                console.log(`❌ ROLE NOT ALLOWED: User is '${userRole}', allowed are [${allowedRoles.join(', ')}]`);
+                return res.status(403).json({ message: "Access denied. User Role not allowed." });
             }
 
             console.log("✅ ROLE ALLOWED");
-            next()
+            next();
+        } catch (error) {
+            console.error("Role verification failed:", error.message);
+            return res.status(500).json({ message: "Internal server error during role validation." });
         }
-    } catch (error) {
-        console.error("Role verification failed:", error.message);
-        return res.status(401).json({ message: "Not accessible, role invalid or not allowed." });
-    }
-}
-
+    };
+};
 // (...) spread operator in js accepts any no. of paras and bundles em into an array named roles (name designated)
 

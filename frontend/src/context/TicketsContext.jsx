@@ -26,7 +26,7 @@ export const TicketsProvider = ({ children }) => {
       const response = await api.tickets.getAllTickets();
       const ticketsList = response.data?.tickets || [];
       const paginationInfo = response.data?.pagination || null;
-    
+
 
       setTickets(ticketsList);
       setPagination(paginationInfo);
@@ -64,6 +64,18 @@ export const TicketsProvider = ({ children }) => {
       const ticket = response.data?.ticket;
 
       console.log("[Ticket] Loaded:", ticketId);
+      console.log("[Ticket] Data:", ticket);
+
+      if (ticket) {
+        setTickets(prevTickets => {
+          const exists = prevTickets.some(t => t._id === ticketId || t._id === ticket._id);
+          if (exists) {
+            return prevTickets.map(t => (t._id === ticketId || t._id === ticket._id) ? ticket : t);
+          } else {
+            return [...prevTickets, ticket];
+          }
+        });
+      }
 
       return {
         success: true,

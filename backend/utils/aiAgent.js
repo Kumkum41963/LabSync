@@ -8,7 +8,7 @@ export const analyzeTicket = async (ticket) => {
   // Create the agent 
   const agent = createAgent({
     model: gemini({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash", // Use a stable supported model name
       apiKey: process.env.GEMINI_API_KEY,
     }),
     name: "Embedded Systems Ticket Triage Assistant",

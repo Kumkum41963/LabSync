@@ -9,6 +9,9 @@ export const api = {
         getAllUsers: () => axiosInstance.get("/auth/users"),
         updateRole: (targetId, role) => axiosInstance.put(`/auth/${targetId}/update-role`, { role }),
         updateSkills: (targetId, skills) => axiosInstance.put(`/auth/${targetId}/update-skills`, { skills }),
+        removeSkill: (targetId, skillToRemove) => axiosInstance.delete(`/auth/${targetId}/remove-skill`, {
+            data: { skillToRemove }
+        }),
         getCurrentUser: () => axiosInstance.get("/auth/current-user"),
         getUserById: (userId) => axiosInstance.get(`/auth/${userId}/user`)
     },

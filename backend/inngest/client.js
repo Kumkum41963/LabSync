@@ -1,5 +1,6 @@
-import {Inngest} from 'inngest'
+import { Inngest } from "inngest";
 
-// Step 1: create and export a single inngest client that will be accessed across the app 
-export const inngest = new Inngest ({id:'ticketing-system'})
-
+export const inngest = new Inngest({
+  id: "labsync-backend",
+  isDev: process.env.NODE_ENV !== "production" || process.env.INNGEST_DEV === "1",
+});

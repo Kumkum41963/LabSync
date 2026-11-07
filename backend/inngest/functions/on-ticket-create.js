@@ -7,8 +7,13 @@ import { inngest } from "../client.js";
 import { suggestModerators } from "../../utils/modSuggestion.js";
 
 export const onTicketCreated = inngest.createFunction(
-  { id: "on-ticket-created", retries: 2 }, // key
-  { event: "ticket/created" }, // trigerring
+  {
+    id: "on-ticket-created", 
+    retries: 2, // key
+    triggers: { 
+      event: "ticket/created" 
+    }
+  }, // trigerring
 
   async ({ event, step }) => {
     // Extract Id from event data

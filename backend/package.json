@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "inngest-dev":"npx inngest-cli@latest dev",
+    "inngest-dev": "npx inngest-cli@latest dev",
     "inngest-worker": "node inngest-worker.js"
   },
   "keywords": [],
@@ -17,12 +17,12 @@
     "nodemon": "^3.1.10"
   },
   "dependencies": {
-    "@inngest/agent-kit": "^0.9.0",
+    "@inngest/agent-kit": "^0.13.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
-    "inngest": "^3.40.1",
+    "inngest": "^4.26.2",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.3",

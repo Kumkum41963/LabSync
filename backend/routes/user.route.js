@@ -1,10 +1,11 @@
 import express from 'express'
-import { login, logout, signup, updateRoles, updateSkills, getAllUsers, getCurrentUser, getUserById } from '../controllers/user.controller.js'
+import { login, logout, signup, updateRoles, updateSkills, removeSkill, getAllUsers, getCurrentUser, getUserById } from '../controllers/user.controller.js'
 import { authenticate, authorizedRoles } from '../middlewares/auth.js'
 const router = express.Router()
 
 router.put('/:id/update-role', authenticate, authorizedRoles("admin", "lab_assistant"), updateRoles)
 router.put('/:id/update-skills', authenticate, authorizedRoles("lab_assistant", "admin", "moderator"), updateSkills)
+router.delete('/:id/remove-skill', authenticate, authorizedRoles("lab_assistant", "admin", "moderator"), removeSkill)
 router.get('/users', authenticate, authorizedRoles("lab_assistant", "admin"), getAllUsers);
 router.get('/current-user', authenticate, getCurrentUser)
 router.get('/:id/user', getUserById)
