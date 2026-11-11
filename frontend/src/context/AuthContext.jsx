@@ -92,17 +92,18 @@ export const AuthProvider = ({ children }) => {
 
       console.log('Role update data', updatedUser);
 
+      // Users array ko immutably update karo (id aur _id dono check ke saath)
       setUsers(prev =>
         prev.map(u =>
-          (u.id === targetId)
-            ? updatedUser
+          ((u.id === targetId || u._id === targetId) || (updatedUser && (u.id === updatedUser.id || u._id === updatedUser._id)))
+            ? { ...u, ...updatedUser }
             : u
         )
       );
 
-      // update currentUser in the localstorage or session too if it's me (cuurentUser)
-      if (currentUser?.id === targetId) {
-        saveSession({ user: updatedUser });
+      // Agar ye logged-in user khud hai, toh currentUser state aur session ko update karo
+      if (currentUser && (currentUser.id === targetId || currentUser._id === targetId)) {
+        setCurrentUser(prev => ({ ...prev, ...updatedUser }));
       }
 
       return res.data;
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-const handleUpdateSkills = async (targetId, newSkills=[]) => {
+  const handleUpdateSkills = async (targetId, newSkills = []) => {
     try {
       const res = await api.auth.updateSkills(targetId, newSkills);
       const skilledUser = res.data.user;

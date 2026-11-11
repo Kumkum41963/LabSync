@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useRole } from '@/context/RoleContext';
+import { toast } from 'react-hot-toast';
 
 const Profile = () => {
   const { id } = useParams();
@@ -9,12 +10,15 @@ const Profile = () => {
   const { users, currentUser, handleUpdateRole, handleUpdateSkills, handleRemoveSkill } = useAuth();
   const { isAdmin, isModerator, isLabAssistant } = useRole();
 
+  // It is important to use useMemo here to avoid unnecessary recalculations of the user object on every render, especially when users or currentUser change. This ensures that the user is only recalculated when id, users, or currentUser change.
   const user = useMemo(() => {
     return id ? users?.find(u => u.id === id || u._id === id) : currentUser;
   }, [id, users, currentUser]);
 
   const [newRole, setNewRole] = useState(user?.role || '');
   const [skillInput, setSkillInput] = useState('');
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  const [isAddingSkills, setIsAddingSkills] = useState(false);
 
   useEffect(() => {
     if (user?.role) {
@@ -26,31 +30,66 @@ const Profile = () => {
 
   const handleRoleChange = async (e) => {
     e.preventDefault();
-    await handleUpdateRole(user.id || user._id, newRole);
+
+    console.log('Role change krna strt')
+
+    if (newRole === user.role) {
+      toast.error('Role is already set to this value.');
+      return;
+    }
+    
+    // if not same i.e new role changed 
+    setIsUpdatingRole(true)
+    const toastId = toast.loading('Updating user role...')
+
+    try {
+      await handleUpdateRole(user.id || user._id, newRole);
+
+      toast.success(`Role updated successfully to ${newRole.replace('_', ' ')}!`, { id: toastId });
+    } catch (error) {
+      console.error('Failed to update role:', error);
+      toast.error(error?.message || 'Failed to update role. Please try again.', { id: toastId });
+    } finally {
+      setIsUpdatingRole(false);
+    }
   };
 
   const handleAddSkill = async (e) => {
     e.preventDefault();
-    console.log("Adding Skills:", skillInput)
     if (!skillInput.trim()) return;
-    
+
     const skillsArray = skillInput
       .split(',')
       .map(s => s.trim())
       .filter(s => s !== '');
 
-    await handleUpdateSkills(user.id || user._id, skillsArray);
-    console.log('Skills added:', skillsArray)
-    setSkillInput('');
+    setIsAddingSkills(true);
+    const toastId = toast.loading('Adding skills...');
+
+    try {
+      await handleUpdateSkills(user.id || user._id, skillsArray);
+      toast.success('Skills added successfully!', { id: toastId });
+      setSkillInput('');
+    } catch (error) {
+      console.error('Failed to add skills:', error);
+      toast.error('Failed to add skills.', { id: toastId });
+    } finally {
+      setIsAddingSkills(false);
+    }
   };
 
   const handleDeleteSkill = async (skillToRemove) => {
-    console.log('Removing Skill:', skillToRemove);
-    console.log('User ID:', user.id || user._id);
-    await handleRemoveSkill(user.id || user._id, skillToRemove);
+    const toastId = toast.loading(`Removing ${skillToRemove}...`);
+    try {
+      await handleRemoveSkill(user.id || user._id, skillToRemove);
+      toast.success(`Removed ${skillToRemove}`, { id: toastId });
+    } catch (error) {
+      console.error('Failed to remove skill:', error);
+      toast.error('Failed to remove skill.', { id: toastId });
+    }
   };
 
-  return (
+return (
     <div className="max-w-4xl mx-auto space-y-6">
       {(isAdmin || isLabAssistant) && (
         <div className="mb-2">
@@ -77,11 +116,11 @@ const Profile = () => {
         </div>
       </div>
 
+      {/* Administrative Controls Section */}
       {(isAdmin || isLabAssistant) && (
-        <div className="glass-panel p-6 rounded-2xl border border-primary/20 shadow-lg bg-primary/5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-primary inline-block"></span>
+        <div className="glass-panel p-6 rounded-2xl border border-border/60 shadow-lg space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs text-muted-foreground uppercase tracking-widest">
               Administrative Controls
             </h3>
           </div>
@@ -92,6 +131,7 @@ const Profile = () => {
                 className="auth-select w-full bg-background/80 border-border focus:ring-2 focus:ring-primary/40 rounded-xl" 
                 value={newRole} 
                 onChange={(e) => setNewRole(e.target.value)}
+                disabled={isUpdatingRole}
               >
                 <option value="admin">Admin</option>
                 <option value="student">Student</option>
@@ -99,8 +139,12 @@ const Profile = () => {
                 <option value="lab_assistant">Lab Assistant</option>
               </select>
             </div>
-            <button type="submit" className="auth-btn mt-0 w-full sm:w-auto px-8 py-2.5 bg-primary text-primary-foreground font-medium rounded-xl">
-              Save Role Change
+            <button 
+              type="submit" 
+              disabled={isUpdatingRole}
+              className="auth-btn mt-0 w-full sm:w-auto px-8 py-2.5 bg-primary text-primary-foreground font-medium rounded-xl disabled:opacity-50 transition-all"
+            >
+              {isUpdatingRole ? 'Updating...' : 'Save Role Change'}
             </button>
           </form>
         </div>
@@ -110,7 +154,7 @@ const Profile = () => {
       <div className="glass-panel p-6 rounded-2xl border border-border/60 shadow-lg space-y-6">
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm text-muted-foreground uppercase tracking-widest">Skills & Technologies</h3>
+            <h3 className="text-xs text-muted-foreground uppercase tracking-widest">Skills & Technologies</h3>
           </div>
 
           <div className="flex flex-wrap gap-2.5">
@@ -144,6 +188,7 @@ const Profile = () => {
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <input 
                 type="text" 
+                disabled={isAddingSkills}
                 className="auth-input w-full pl-4 pr-4 py-2.5 bg-background/50 border-border/70 rounded-xl focus:bg-background focus:ring-2 focus:ring-accent/40 focus:border-accent transition-all text-sm" 
                 placeholder="Comma separated (e.g. React, Node, Python...)" 
                 value={skillInput} 
@@ -151,9 +196,10 @@ const Profile = () => {
               />
               <button 
                 type="submit" 
-                className="w-full sm:w-auto px-6 py-2.5 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap"
+                disabled={isAddingSkills}
+                className="w-full sm:w-auto px-6 py-2.5 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50"
               >
-                <span>+ Add Skills</span>
+                <span>{isAddingSkills ? 'Adding...' : '+ Add Skills'}</span>
               </button>
             </div>
           </form>
