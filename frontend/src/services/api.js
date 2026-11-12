@@ -21,6 +21,9 @@ export const api = {
         delete: (id) => axiosInstance.delete(`/tickets/${id}`),
         update: (id, data) => axiosInstance.put(`/tickets/${id}`, data),
         create: (data) => axiosInstance.post("/tickets", data),
-        assignModerator: (id, moderatorId) => axiosInstance.patch(`/tickets/${id}/assign`, { moderatorId }),
+        assignMod: (id, moderatorId) => axiosInstance.patch(`/tickets/${id}/assign-mod`, { moderatorId }),
+        unassignMod: (id) => axiosInstance.patch(`/tickets/${id}/unassign-mod`),
+        updateTicketByModerator: (id, data) => axiosInstance.patch(`/tickets/${id}/moderator-update`, data),
+        getSuggestedModerators: (id) => axiosInstance.get(`/tickets/${id}/suggested-moderators`),
     }
 }

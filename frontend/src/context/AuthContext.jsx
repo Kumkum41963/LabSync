@@ -86,32 +86,36 @@ export const AuthProvider = ({ children }) => {
   };
 
   const handleUpdateRole = async (targetId, newRole) => {
-    try {
-      const res = await api.auth.updateRole(targetId, newRole);
-      const updatedUser = res.data.user;
+  try {
+    const res = await api.auth.updateRole(targetId, newRole);
+    const updatedUser = res.data.user;
 
-      console.log('Role update data', updatedUser);
+    console.log('Role update response:', updatedUser);
 
-      // Users array ko immutably update karo (id aur _id dono check ke saath)
-      setUsers(prev =>
-        prev.map(u =>
-          ((u.id === targetId || u._id === targetId) || (updatedUser && (u.id === updatedUser.id || u._id === updatedUser._id)))
-            ? { ...u, ...updatedUser }
-            : u
-        )
-      );
+    // Forceful state update with String conversion (ID mismatch fix)
+    setUsers(prev =>
+      prev.map(u => {
+        const match = String(u.id || u._id) === String(targetId || updatedUser?._id);
+        return match ? { ...u, ...updatedUser, role: newRole } : u;
+      })
+    );
 
-      // Agar ye logged-in user khud hai, toh currentUser state aur session ko update karo
-      if (currentUser && (currentUser.id === targetId || currentUser._id === targetId)) {
-        setCurrentUser(prev => ({ ...prev, ...updatedUser }));
-      }
-
-      return res.data;
-    } catch (err) {
-      console.log('Error in updating role:', err.message);
-      throw err;
+    // Current user state update
+    if (currentUser && String(currentUser.id || currentUser._id) === String(targetId)) {
+      setCurrentUser(prev => ({ ...prev, ...updatedUser, role: newRole }));
     }
-  };
+
+    // Session save
+    if (typeof saveSession === 'function') {
+      saveSession({ user: updatedUser });
+    }
+
+    return res.data;
+  } catch (err) {
+    console.log('Error in updating role:', err.message);
+    throw err;
+  }
+};
 
   const handleUpdateSkills = async (targetId, newSkills = []) => {
     try {

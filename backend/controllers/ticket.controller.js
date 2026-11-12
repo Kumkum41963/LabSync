@@ -369,51 +369,79 @@ export const deleteTicketById = async (req, res) => {
   }
 };
 
-// assignModerator: Lab Assistant assigns a moderator to a ticket
-export const assignModerator = async (req, res) => {
+// getSuggestedModerators: Fallback to show all moderators sorted by matches even if 0 match
+export const getSuggestedModerators = async (req, res) => {
   try {
-    const { id } = req.params; // ticket id
-    const { moderatorId } = req.body;
-    const user = req.user; // who’s assigning
+    const { id } = req.params;
+    const user = req.user;
 
-    console.log(
-      `🧰 ${user.role} assigning moderator ${moderatorId} to ticket ${id}`
-    );
+    console.log(`🔍 Fetching suggested moderators for ticket ${id} by ${user?.role || "user"}`);
 
-    // Only lab assistant or admin can assign
-    const allowedRoles = ["lab_assistant", "admin"];
-    if (!allowedRoles.includes(user.role)) {
-      return res.status(403).json({ message: "Not authorized ❌" });
-    }
-
-    // Check if moderator exists and has correct role
-    const moderator = await User.findById(moderatorId);
-    if (!moderator || moderator.role !== "moderator") {
-      return res.status(400).json({ message: "Invalid moderator ID ❌" });
-    }
-
-    // Find the ticket
     const ticket = await Ticket.findById(id);
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found ❌" });
     }
 
-    // Assign the moderator
+    const moderators = await User.find({ role: "moderator" });
+
+    const scoredModerators = moderators.map((mod) => {
+      const matchCount = mod.skills.filter((skill) =>
+        ticket.tags.includes(skill.toLowerCase())
+      ).length;
+      return { moderator: mod, matchCount };
+    });
+
+    scoredModerators.sort((a, b) => b.matchCount - a.matchCount);
+
+    return res.status(200).json({
+      message: "Suggested moderators fetched successfully 🟢",
+      suggestedModerators: scoredModerators.map((item) => item.moderator),
+    });
+  } catch (error) {
+    console.error("❌ Error fetching suggested moderators:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// assignModerator: Lab Assistant assigns a moderator to a ticket
+export const assignModerator = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { moderatorId } = req.body;
+    const user = req.user;
+
+    console.log(
+      `🧰 ${user.role} assigning moderator ${moderatorId} to ticket ${id}`
+    );
+
+    const moderator = await User.findById(moderatorId);
+    if (!moderator || moderator.role !== "moderator") {
+      return res.status(400).json({ message: "Invalid moderator ID ❌" });
+    }
+
+    const ticket = await Ticket.findById(id);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found ❌" });
+    }
+
     ticket.assignedModerator = moderatorId;
     ticket.assignedByLabAssistant = user._id;
     ticket.status = "in_progress";
     ticket.auditLog.push({
       actionBy: user._id,
       role: user.role,
-      fieldsChanged: ["assignedModerator"],
+      fieldsChanged: ["assignedModerator", "status"],
       updatedAt: new Date(),
     });
 
     const updatedTicket = await ticket.save();
+    const populatedTicket = await Ticket.findById(updatedTicket._id)
+      .populate("assignedModerator", "name email skills")
+      .populate("assignedByLabAssistant", "name role");
 
     return res.status(200).json({
       message: "Moderator assigned successfully 🟢",
-      ticket: updatedTicket,
+      ticket: populatedTicket,
     });
   } catch (error) {
     console.error("❌ Error assigning moderator:", error.message);
@@ -421,6 +449,86 @@ export const assignModerator = async (req, res) => {
   }
 };
 
-// getDashboardStats: Show ticket counts by status, priority, or tag
+// unassignModerator: Remove moderator assignment from ticket
+export const unassignModerator = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
 
-// closeTicket: Student confirms issue resolved (marks ticket closed)
+    console.log(`🔌 ${user.role} unassigning moderator from ticket ${id}`);
+
+    const ticket = await Ticket.findById(id);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found ❌" });
+    }
+
+    ticket.assignedModerator = null;
+    ticket.assignedByLabAssistant = null;
+    ticket.auditLog.push({
+      actionBy: user._id,
+      role: user.role,
+      fieldsChanged: ["assignedModerator", "assignedByLabAssistant"],
+      updatedAt: new Date(),
+    });
+
+    const updatedTicket = await ticket.save();
+
+    return res.status(200).json({
+      message: "Moderator unassigned successfully 🟢",
+      ticket: updatedTicket,
+    });
+  } catch (error) {
+    console.error("❌ Error unassigning moderator:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// updateTicketByModerator: Update comment and status for authorized personnel
+export const updateTicketByModerator = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { comment, status } = req.body;
+    const user = req.user;
+
+    console.log(`💬 ${user.role} updating ticket ${id}`);
+
+    const ticket = await Ticket.findById(id);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found ❌" });
+    }
+
+    // 🔒 Reject if the ticket was ALREADY closed before this request
+    if (ticket.status === "closed") {
+      return res.status(400).json({ message: "This ticket is closed and locked from further edits ❌" });
+    }
+
+    const fieldsChanged = [];
+    if (comment !== undefined) {
+      ticket.comment = comment;
+      fieldsChanged.push("comment");
+    }
+    if (status !== undefined) {
+      ticket.status = status;
+      fieldsChanged.push("status");
+    }
+
+    ticket.auditLog.push({
+      actionBy: user._id,
+      role: user.role,
+      fieldsChanged,
+      updatedAt: new Date(),
+    });
+
+    const updatedTicket = await ticket.save();
+
+    return res.status(200).json({
+      message: "Ticket updated successfully 🟢",
+      ticket: updatedTicket,
+    });
+  } catch (error) {
+    console.error("❌ Error updating ticket by moderator:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// getDashboardStats: Show ticket counts by status, priority, or tag

@@ -205,9 +205,9 @@ export const TicketsProvider = ({ children }) => {
   };
 
   // Assign moderator
-  const assignModerator = async (ticketId, moderatorId) => {
+  const assignMod = async (ticketId, moderatorId) => {
     if (!ticketId || !moderatorId) {
-      console.warn("[AssignModerator] Missing ticketId or moderatorId");
+      console.warn("[AssignMod] Missing ticketId or moderatorId");
       return {
         success: false,
         message: "Ticket ID and Moderator ID are required",
@@ -217,7 +217,7 @@ export const TicketsProvider = ({ children }) => {
 
     const allowedRoles = ["lab_assistant", "admin"];
     if (!allowedRoles.includes(role)) {
-      console.warn("[AssignModerator] Permission denied for role:", role);
+      console.warn("[AssignMod] Permission denied for role:", role);
       return {
         success: false,
         message: "You are not authorized to assign moderators",
@@ -228,7 +228,7 @@ export const TicketsProvider = ({ children }) => {
     setLoading(true);
 
     try {
-      const response = await api.tickets.assignModerator(ticketId, moderatorId);
+      const response = await api.tickets.assignMod(ticketId, moderatorId);
       const updatedTicket = response.data?.ticket;
 
       setTickets((prev) =>
@@ -237,7 +237,7 @@ export const TicketsProvider = ({ children }) => {
         )
       );
 
-      console.log("[AssignModerator] Assigned:", ticketId);
+      console.log("[AssignMod] Assigned:", ticketId);
 
       return {
         success: true,
@@ -245,7 +245,7 @@ export const TicketsProvider = ({ children }) => {
         data: updatedTicket,
       };
     } catch (error) {
-      console.error("[AssignModerator] Failed:", error);
+      console.error("[AssignMod] Failed:", error);
       return {
         success: false,
         message: "Failed to assign moderator",
@@ -253,6 +253,118 @@ export const TicketsProvider = ({ children }) => {
       };
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Unassign Mod
+  const unassignMod = async (ticketId) => {
+    if (!ticketId) {
+      console.warn("[UnassignMod] Missing ticketId");
+      return { success: false, message: "Ticket ID is required", data: null };
+    }
+
+    const allowedRoles = ["lab_assistant", "admin"];
+    if (!allowedRoles.includes(role)) {
+      console.warn("[UnassignMod] Permission denied for role:", role);
+      return {
+        success: false,
+        message: "You are not authorized to unassign moderators",
+        data: null,
+      };
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await api.tickets.unassignMod(ticketId);
+      const updatedTicket = response.data?.ticket;
+
+      setTickets((prev) =>
+        prev.map((ticket) =>
+          ticket._id === ticketId ? updatedTicket : ticket
+        )
+      );
+
+      console.log("[UnassignMod] Unassigned:", ticketId);
+
+      return {
+        success: true,
+        message: "Moderator unassigned successfully",
+        data: updatedTicket,
+      };
+    } catch (error) {
+      console.error("[UnassignMod] Failed:", error);
+      return {
+        success: false,
+        message: "Failed to unassign moderator",
+        error,
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Moderator/Staff update (comment + status with locking check)
+  const updateTicketByModerator = async (ticketId, updateData) => {
+    if (!ticketId) {
+      console.warn("[UpdateTicketByMod] Missing ticketId");
+      return { success: false, message: "Ticket ID is required", data: null };
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await api.tickets.updateTicketByModerator(ticketId, updateData);
+      const updatedTicket = response.data?.ticket;
+
+      setTickets((prev) =>
+        prev.map((ticket) =>
+          ticket._id === ticketId ? updatedTicket : ticket
+        )
+      );
+
+      return {
+        success: true,
+        message: "Ticket updated successfully",
+        data: updatedTicket,
+      };
+    } catch (error) {
+      console.error("[UpdateTicketByMod] Failed:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to update ticket",
+        error,
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get suggested moderators for a specific ticket
+  const getSuggestedModerators = async (ticketId) => {
+    if (!ticketId) {
+      console.warn("[GetSuggestedModerators] Missing ticketId");
+      return { success: false, message: "Ticket ID is required", data: [] };
+    }
+
+    try {
+      const response = await api.tickets.getSuggestedModerators(ticketId);
+      const suggested = response.data?.suggestedModerators || response.data || [];
+      
+      console.log("[GetSuggestedModerators] Loaded:", suggested.length);
+      return {
+        success: true,
+        message: "Suggested moderators fetched successfully",
+        data: suggested,
+      };
+    } catch (error) {
+      console.error("[GetSuggestedModerators] Failed:", error);
+      return {
+        success: false,
+        message: "Failed to fetch suggested moderators",
+        error,
+        data: [],
+      };
     }
   };
 
@@ -273,7 +385,10 @@ export const TicketsProvider = ({ children }) => {
         createTicket,
         updateTicket,
         deleteTicket,
-        assignModerator,
+        assignMod,
+        unassignMod,
+        updateTicketByModerator,
+        getSuggestedModerators,
         refreshTickets,
       }}
     >

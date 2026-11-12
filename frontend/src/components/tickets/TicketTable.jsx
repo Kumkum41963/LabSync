@@ -133,10 +133,11 @@ const TicketTable = ({ tickets }) => {
         </TableBody>
       </Table>
 
-      {/* Modal (display only for now) */}
+      {/* Modal with ticketId passed properly */}
       <ModeratorSelectionModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
+        ticketId={selectedTicket?._id}
         isReassign={!!selectedTicket?.assignedModerator}
       />
     </div>

@@ -5,7 +5,10 @@ import {
   getTicketById,
   updateTicketById,
   deleteTicketById,
+  getSuggestedModerators,
   assignModerator,
+  unassignModerator,
+  updateTicketByModerator,
 } from "../controllers/ticket.controller.js";
 import { authenticate, authorizedRoles } from "../middlewares/auth.js";
 
@@ -17,6 +20,11 @@ router.get("/", authenticate, getTickets);
 router.get("/:id", authenticate, getTicketById);
 router.put("/:id", authenticate, updateTicketById);
 router.delete("/:id", authenticate, authorizedRoles("student", "admin"), deleteTicketById);
-router.post("/:id/assign", authenticate, authorizedRoles("lab_assistant", "admin"), assignModerator);
+
+// Moderator assignment and management routes
+router.get("/:id/suggested-moderators", authenticate, getSuggestedModerators);
+router.patch("/:id/assign-mod", authenticate, authorizedRoles("lab_assistant", "admin"), assignModerator);
+router.patch("/:id/unassign-mod", authenticate, authorizedRoles("lab_assistant", "admin"), unassignModerator);
+router.patch("/:id/moderator-update", authenticate, authorizedRoles("moderator", "admin", "lab_assistant"), updateTicketByModerator);
 
 export default router;
