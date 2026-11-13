@@ -1,5 +1,6 @@
-import Comment from "./models/comment.model.js";
-import Ticket from "./models/ticket.model.js";
+import Comment from "../models/comment.model.js";
+import Ticket from "../models/ticket.model.js";
+// import User from "../models/user.model.js";
 
 // Get all comments for a specific ticket
 export const getCommentsByTicket = async (req, res) => {

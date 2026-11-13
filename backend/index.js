@@ -8,6 +8,7 @@ import connectDB from "./utils/dbConfig.js";
 import userRoutes from "./routes/user.route.js";
 import ticketRoutes from "./routes/ticket.route.js";
 import dashboardRoute from "./routes/dashboard.route.js";
+import commentRoutes from "./routes/comment.route.js";
 
 import { serve } from "inngest/express";
 
@@ -29,6 +30,7 @@ app.use(express.json());
 app.use("/api/auth", userRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/dashboard", dashboardRoute);
+app.use('/api', commentRoutes);
 
 // Step 2: mount inngest on express 
 app.use(
