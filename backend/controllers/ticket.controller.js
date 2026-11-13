@@ -198,11 +198,19 @@ export const getTicketById = async (req, res) => {
       `Fetching ticket with ID: ${ticketId} createdby ${user.name} and asssigned to`
     );
 
-    // Find the ticket and populate related fields
+    // Find the ticket and populate related fields (including comments and their authors)
     const ticket = await Ticket.findById(ticketId)
       .populate("createdBy", ["name", "email", "_id", "role"])
       .populate("assignedModerator", ["name", "email", "_id"])
-      .populate("assignedByLabAssistant", ["name", "email", "_id"]);
+      .populate("assignedByLabAssistant", ["name", "email", "_id"])
+      .populate({
+        path: "comments",
+        populate: {
+          path: "author",
+          select: "name email role _id",
+        },
+        options: { sort: { createdAt: -1 } }, 
+      });
 
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found ❌" });

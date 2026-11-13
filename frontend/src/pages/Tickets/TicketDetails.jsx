@@ -7,6 +7,7 @@ import { useTickets } from "@/context/TicketsContext";
 import { useRole } from "@/context/RoleContext";
 import BackBtn from "@/components/tickets/BackBtn";
 import ModeratorSelectionModal from "@/components/tickets/ModeratorSelectionModal";
+import TicketComments from "@/components/tickets/TicketComments";
 
 export default function TicketDetails() {
   const { id } = useParams();
@@ -79,7 +80,7 @@ export default function TicketDetails() {
 
   const renderUserLink = (userObj, fallback = "Unassigned") => {
     if (!userObj) return <span className="text-muted-foreground">{fallback}</span>;
-    
+
     const targetRole = userObj.role;
     const isClickable =
       targetRole === "student" ||
@@ -101,58 +102,6 @@ export default function TicketDetails() {
     return <span className="text-xs sm:text-sm">{userObj.name}</span>;
   };
 
-  // Add Comment Handler
-  const handleAddCommentSubmit = async (e) => {
-    e.preventDefault();
-    if (!newCommentText.trim()) return;
-
-    setSubmitting(true);
-    try {
-      console.log("Adding comment:", newCommentText);
-      const res = await addComment(ticket._id, newCommentText);
-      if (res.success) {
-        setNewCommentText("");
-      } else {
-        console.log("Error adding comment:", res.message);
-      }
-    } catch (error) {
-      setNewCommentText("");
-      console.error("Error adding comment:", error);
-    } finally {
-      setNewCommentText("");
-      setSubmitting(false);
-    }
-  };
-
-  // Update Comment Handler
-  const handleUpdateCommentSubmit = async (commentId) => {
-    if (!editText.trim()) return;
-    try {
-      const res = await updateComment(commentId, ticket._id, editText);
-      if (res.success) {
-        setEditingCommentId(null);
-        setEditText("");
-      } else {
-        alert(res.message || "Failed to update comment");
-      }
-    } catch (error) {
-      console.error("Error updating comment:", error);
-    }
-  };
-
-  // Delete Comment Handler
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Are you sure you want to delete this comment?")) return;
-    try {
-      const res = await deleteComment(commentId, ticket._id);
-      if (!res.success) {
-        alert(res.message || "Failed to delete comment");
-      }
-    } catch (error) {
-      console.error("Error deleting comment:", error);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
@@ -165,8 +114,6 @@ export default function TicketDetails() {
     return <Navigate to="/tickets" replace />;
   }
 
-  const isStudent = role === "student";
-  const isClosed = ticket.status === "closed";
   const canAssignModal = isAdmin || isLabAssistant;
 
   // Consistent Status Styling
@@ -202,7 +149,7 @@ export default function TicketDetails() {
 
       {/* Main 2x2 Wireframe Container */}
       <div className="border border-border/80 rounded-xl p-4 sm:p-6 bg-card/30 space-y-6">
-        
+
         {/* TOP ROW: Description (Left) & AI Summary (Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Top-Left: Description */}
@@ -247,7 +194,7 @@ export default function TicketDetails() {
 
         {/* BOTTOM ROW: Details + Tags (Left) & Comments (Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          
+
           {/* Bottom-Left Column: Details Block + Tags Block */}
           <div className="space-y-4">
             {/* Details Card */}
@@ -323,113 +270,8 @@ export default function TicketDetails() {
             </div>
           </div>
 
-          {/* Bottom-Right Column: Comments Thread (Status Toolbar removed) */}
-          <div className="glass-panel border border-border rounded-lg p-6 h-full flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Comments</h2>
-                </div>
-                {isClosed && (
-                  <Badge variant="outline" className="text-xs border-destructive/40 text-destructive">
-                    Closed
-                  </Badge>
-                )}
-              </div>
-
-              {/* Comments List */}
-              <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
-                {ticket.comments?.length ? (
-                  ticket.comments.map((comment) => {
-                    const authorId = comment.author?._id || comment.author;
-                    const isAuthor = authorId?.toString() === currentUser?._id?.toString();
-                    const canModify = !isStudent && (isAdmin || isLabAssistant || isAuthor) && (!isClosed || isAdmin || isLabAssistant);
-                    const isEditing = editingCommentId === comment._id;
-                    
-                    // Comments List Item
-                    return (
-                      <div key={comment._id} className="bg-muted/30 p-3.5 rounded-lg border border-border space-y-2">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span className="font-semibold text-foreground">
-                            {renderUserLink(comment.author, "Unknown User")}
-                            <span className="ml-1.5 text-[10px] font-normal uppercase text-muted-foreground/85">
-                              ({comment.author?.role})
-                            </span>
-                          </span>
-                          <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
-                        </div>
-
-                        {isEditing ? (
-                          <div className="space-y-2">
-                            <textarea
-                              value={editText}
-                              onChange={(e) => setEditText(e.target.value)}
-                              rows={3}
-                              className="w-full bg-input/50 border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                            />
-                            <div className="flex justify-end gap-2">
-                              <Button size="sm" variant="outline" onClick={() => setEditingCommentId(null)}>
-                                Cancel
-                              </Button>
-                              <Button size="sm" onClick={() => handleUpdateCommentSubmit(comment._id)}>
-                                Save
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-foreground whitespace-pre-line">{comment.text}</p>
-                        )}
-
-                        {/* Action buttons for authorized users */}
-                        {canModify && !isEditing && (
-                          <div className="flex justify-end gap-2 pt-1 border-t border-border/30">
-                            <button
-                              onClick={() => {
-                                setEditingCommentId(comment._id);
-                                setEditText(comment.text);
-                              }}
-                              className="text-xs text-primary hover:underline flex items-center gap-1"
-                            >
-                              <Edit3 className="w-3 h-3" /> Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteComment(comment._id)}
-                              className="text-xs text-destructive hover:underline flex items-center gap-1 ml-2"
-                            >
-                              <Trash2 className="w-3 h-3" /> Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="p-6 text-center text-muted-foreground text-xs bg-muted/20 rounded-md border border-dashed border-border">
-                    No comments posted yet.
-                  </div>
-                )}
-              </div>
-
-              {/* Add Comment Input (Hidden for students if closed or strict rules, visible for staff/moderators) */}
-              {(!isStudent && (!isClosed || isAdmin || isLabAssistant)) && (
-                <form onSubmit={handleAddCommentSubmit} className="pt-3 border-t border-border/40 space-y-3">
-                  <textarea
-                    value={newCommentText}
-                    onChange={(e) => setNewCommentText(e.target.value)}
-                    rows={3}
-                    placeholder="Write a new comment or lab update..."
-                    className="w-full bg-input/40 border border-border rounded-md p-2.5 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <div className="flex justify-end">
-                    <Button type="submit" disabled={submitting || !newCommentText.trim()} size="sm">
-                      {submitting ? "Posting..." : "Post Comment"}
-                    </Button>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
+          {/* Bottom-Right Column: Comments Component */}
+          <TicketComments ticket={ticket} renderUserLink={renderUserLink} />
 
         </div>
       </div>
