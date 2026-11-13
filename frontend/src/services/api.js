@@ -25,5 +25,11 @@ export const api = {
         unassignMod: (id) => axiosInstance.patch(`/tickets/${id}/unassign-mod`),
         updateTicketByModerator: (id, data) => axiosInstance.patch(`/tickets/${id}/moderator-update`, data),
         getSuggestedModerators: (id) => axiosInstance.get(`/tickets/${id}/suggested-moderators`),
+    },
+    comments: {
+        getByTicket: (ticketId) => axiosInstance.get(`/tickets/${ticketId}/comments`),
+        create: (ticketId, text) => axiosInstance.post(`/tickets/${ticketId}/comments`, { text }),
+        update: (commentId, text) => axiosInstance.put(`/comments/${commentId}`, { text }),
+        delete: (commentId) => axiosInstance.delete(`/comments/${commentId}`),
     }
 }

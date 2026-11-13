@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
-import Navbar from "@/components/layout/Navbar";
+// import Navbar from "@/components/layout/Navbar";
 import { TooltipProvider } from "@/components/ui/tooltip"; // Import this
 
 const Layout = () => {
@@ -15,10 +15,10 @@ const Layout = () => {
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
         <div className="flex flex-col flex-1 min-w-0">
-          <Navbar />
+          {/* <Navbar /> */}
 
           <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
-            <div className="max-w-[1400px] mx-auto animate-in fade-in duration-500">
+            <div className="mx-auto animate-in fade-in duration-500">
               <Outlet />
             </div>
           </main>

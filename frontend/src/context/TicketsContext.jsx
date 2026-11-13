@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback} from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRole } from "@/context/RoleContext";
 import { api } from "@/services/api";
@@ -16,7 +16,7 @@ export const TicketsProvider = ({ children }) => {
   // Fetch all tickets
   const getTickets = async () => {
     if (!currentUser) {
-      console.warn("[Tickets] Fetch skipped: user not logged in");
+      // console.warn("[Tickets] Fetch skipped: user not logged in");
       return { success: false, message: "User not logged in", data: null };
     }
 
@@ -30,8 +30,8 @@ export const TicketsProvider = ({ children }) => {
 
       setTickets(ticketsList);
       setPagination(paginationInfo);
-      console.log('all tickets:', response.data.tickets)
-      console.log("[Tickets] Loaded:", ticketsList.length);
+      // console.log('all tickets:', response.data.tickets)
+      // console.log("[Tickets] Loaded:", ticketsList.length);
 
       return {
         success: true,
@@ -51,9 +51,9 @@ export const TicketsProvider = ({ children }) => {
   };
 
   // Fetch single ticket
-  const getTicketById = async (ticketId) => {
+  const getTicketById = useCallback(async (ticketId) => {
     if (!ticketId) {
-      console.warn("[Ticket] Fetch skipped: ticketId missing");
+      // console.warn("[Ticket] Fetch skipped: ticketId missing");
       return { success: false, message: "Ticket ID is required", data: null };
     }
 
@@ -63,8 +63,8 @@ export const TicketsProvider = ({ children }) => {
       const response = await api.tickets.getTicketById(ticketId);
       const ticket = response.data?.ticket;
 
-      console.log("[Ticket] Loaded:", ticketId);
-      console.log("[Ticket] Data:", ticket);
+      // console.log("[Ticket] Loaded:", ticketId);
+      // console.log("[Ticket] Data:", ticket);
 
       if (ticket) {
         setTickets(prevTickets => {
@@ -83,7 +83,7 @@ export const TicketsProvider = ({ children }) => {
         data: ticket,
       };
     } catch (error) {
-      console.error("[Ticket] Fetch failed:", error);
+      // console.error("[Ticket] Fetch failed:", error);
       return {
         success: false,
         message: "Failed to fetch ticket",
@@ -92,7 +92,7 @@ export const TicketsProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setTickets]);
 
   // Create ticket
   const createTicket = async (ticketData) => {
@@ -368,6 +368,107 @@ export const TicketsProvider = ({ children }) => {
     }
   };
 
+// Fetch comments for a specific ticket
+  const getCommentsByTicket = async (ticketId) => {
+    console.log(`[DEBUG Context] Fetching comments request for ticketId: ${ticketId}`);
+    try {
+      const response = await api.comments.getByTicket(ticketId);
+      const comments = response.data?.comments || [];
+      console.log(`[DEBUG Context] Successfully fetched ${comments.length} comments for ticketId: ${ticketId}`, comments);
+      return { success: true, data: comments };
+    } catch (error) {
+      console.error(`[DEBUG ERROR Context] Failed to fetch comments for ticketId: ${ticketId}`, error);
+      return { success: false, data: [] };
+    }
+  };
+
+  // Add a comment
+  const addComment = async (ticketId, text) => {
+    console.log(`[DEBUG Context] Attempting to add comment to ticketId: ${ticketId}`, { text });
+    setLoading(true);
+    try {
+      const response = await api.comments.create(ticketId, text);
+      const newComment = response.data?.comment;
+      console.log(`[DEBUG Context] Comment created successfully on server:`, newComment);
+
+      // Update local tickets state so the ticket reflects the new comment immediately
+      setTickets((prev) =>
+        prev.map((t) => {
+          if (t._id === ticketId) {
+            console.log(`[DEBUG Context] Updating local ticket state for ID: ${ticketId} with new comment`);
+            return {
+              ...t,
+              comments: [...(t.comments || []), newComment],
+            };
+          }
+          return t;
+        })
+      );
+
+      return { success: true, data: newComment };
+    } catch (error) {
+      console.error(`[DEBUG ERROR Context] Failed to add comment for ticketId: ${ticketId}`, error);
+      return { success: false, message: error.response?.data?.message || "Failed to add comment" };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update a comment
+  const updateComment = async (commentId, ticketId, text) => {
+    console.log(`[DEBUG Context] Attempting to update commentId: ${commentId} for ticketId: ${ticketId}`, { text });
+    try {
+      const response = await api.comments.update(commentId, text);
+      const updatedComment = response.data?.comment;
+      console.log(`[DEBUG Context] Comment updated successfully on server:`, updatedComment);
+
+      setTickets((prev) =>
+        prev.map((t) => {
+          if (t._id === ticketId) {
+            console.log(`[DEBUG Context] Updating local ticket state comments array for ticketId: ${ticketId}`);
+            return {
+              ...t,
+              comments: t.comments.map((c) => (c._id === commentId ? updatedComment : c)),
+            };
+          }
+          return t;
+        })
+      );
+
+      return { success: true, data: updatedComment };
+    } catch (error) {
+      console.error(`[DEBUG ERROR Context] Failed to update commentId: ${commentId}`, error);
+      return { success: false, message: error.response?.data?.message || "Failed to update comment" };
+    }
+  };
+
+  // Delete a comment
+  const deleteComment = async (commentId, ticketId) => {
+    console.log(`[DEBUG Context] Attempting to delete commentId: ${commentId} from ticketId: ${ticketId}`);
+    try {
+      await api.comments.delete(commentId);
+      console.log(`[DEBUG Context] CommentId: ${commentId} deleted successfully on server`);
+
+      setTickets((prev) =>
+        prev.map((t) => {
+          if (t._id === ticketId) {
+            console.log(`[DEBUG Context] Removing commentId: ${commentId} from local ticket state array`);
+            return {
+              ...t,
+              comments: t.comments.filter((c) => c._id !== commentId),
+            };
+          }
+          return t;
+        })
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error(`[DEBUG ERROR Context] Failed to delete commentId: ${commentId}`, error);
+      return { success: false, message: error.response?.data?.message || "Failed to delete"};
+    }
+  }
+
   const refreshTickets = async () => {
     console.log("[Tickets] Refresh requested");
     return await getTickets();
@@ -389,6 +490,10 @@ export const TicketsProvider = ({ children }) => {
         unassignMod,
         updateTicketByModerator,
         getSuggestedModerators,
+        addComment,
+        updateComment,
+        deleteComment,
+        getCommentsByTicket,
         refreshTickets,
       }}
     >

@@ -531,4 +531,5 @@ export const updateTicketByModerator = async (req, res) => {
   }
 };
 
+
 // getDashboardStats: Show ticket counts by status, priority, or tag

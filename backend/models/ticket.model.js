@@ -66,11 +66,13 @@ const ticketSchema = new mongoose.Schema(
       default: "",
     },
 
-    comment: {
-      type: String,
-      default: "",
-    },
-
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      }
+    ],
+    
     auditLog: [
       {
         actionBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

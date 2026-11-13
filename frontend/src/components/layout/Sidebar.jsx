@@ -28,7 +28,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       <aside
         className={cn(
           "h-screen bg-background border-r border-border flex flex-col transition-all duration-300 z-50 sticky top-0",
-          collapsed ? "w-[80px]" : "w-[260px]"
+          collapsed ? "w-[80px]" : "w-[200px]"
         )}
       >
         {/* Header */}
