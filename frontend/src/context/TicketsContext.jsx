@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback} from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRole } from "@/context/RoleContext";
 import { api } from "@/services/api";
@@ -13,25 +13,22 @@ export const TicketsProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState(null);
 
-  // Fetch all tickets
-  const getTickets = async () => {
+  // getTickets to accept params
+  const getTickets = async (queryParams = {}) => {
     if (!currentUser) {
-      // console.warn("[Tickets] Fetch skipped: user not logged in");
       return { success: false, message: "User not logged in", data: null };
     }
 
     setLoading(true);
 
     try {
-      const response = await api.tickets.getAllTickets();
+      // Pass queryParams to your API call (e.g., axios params)
+      const response = await api.tickets.getAllTickets(queryParams);
       const ticketsList = response.data?.tickets || [];
       const paginationInfo = response.data?.pagination || null;
 
-
       setTickets(ticketsList);
       setPagination(paginationInfo);
-      // console.log('all tickets:', response.data.tickets)
-      // console.log("[Tickets] Loaded:", ticketsList.length);
 
       return {
         success: true,
@@ -350,7 +347,7 @@ export const TicketsProvider = ({ children }) => {
     try {
       const response = await api.tickets.getSuggestedModerators(ticketId);
       const suggested = response.data?.suggestedModerators || response.data || [];
-      
+
       console.log("[GetSuggestedModerators] Loaded:", suggested.length);
       return {
         success: true,
@@ -368,7 +365,7 @@ export const TicketsProvider = ({ children }) => {
     }
   };
 
-// Fetch comments for a specific ticket
+  // Fetch comments for a specific ticket
   const getCommentsByTicket = async (ticketId) => {
     console.log(`[DEBUG Context] Fetching comments request for ticketId: ${ticketId}`);
     try {
@@ -465,7 +462,7 @@ export const TicketsProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error(`[DEBUG ERROR Context] Failed to delete commentId: ${commentId}`, error);
-      return { success: false, message: error.response?.data?.message || "Failed to delete"};
+      return { success: false, message: error.response?.data?.message || "Failed to delete" };
     }
   }
 

@@ -4,9 +4,11 @@ import TicketList from "@/components/tickets/TicketList";
 import RaiseTicketButton from "@/components/tickets/RaiseTicketButton";
 import TicketsHeader from "@/components/tickets/TicketsHeader";
 import PaginationControls from "@/components/tickets/PaginationControls";
-import { useRole } from "@/context/RoleContext";
+
+// In Tickets.jsx
 
 const Tickets = () => {
+  // Destructure pagination from useTickets context
   const { tickets, getTickets, pagination } = useTickets();
 
   const [params, setParams] = useState({
@@ -20,9 +22,9 @@ const Tickets = () => {
     limit: 5,
   });
 
-  // on every mount set the tickets paras
   useEffect(() => {
-    getTickets(params); // return tickets with matching params
+    // Pass params here so API fetches the correct page/filters!
+    getTickets(params);
   }, [params]);
 
   return (
@@ -35,23 +37,23 @@ const Tickets = () => {
             Manage lab issues and support tickets
           </p>
         </div>
-
-        {/* Create Ticket */}
         <RaiseTicketButton />
       </div>
 
       {/* Filters + List */}
       <div className="glass-panel bg-card border border-border rounded-2xl shadow-sm p-4 space-y-6">
-        {/* Search and Filter */}
         <TicketsHeader params={params} setParams={setParams} />
 
         {/* All Tickets */}
         <TicketList tickets={tickets} />
 
+        {/* UNCOMMENTED & WIRED UP */}
         <PaginationControls
           page={params.page}
           totalPages={pagination?.totalPages || 1}
-          onChange={(page) => setParams((p) => ({ ...p, page }))}
+          onChange={(newPage) => 
+            setParams((prev) => ({ ...prev, page: newPage }))
+          }
         />
       </div>
     </div>

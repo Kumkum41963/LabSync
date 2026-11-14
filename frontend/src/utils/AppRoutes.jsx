@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import Dashboard from "@/pages/Dashboards/Dashboard";
+import Dashboard from "@/pages/Dashboard";
 import CheckAuth from "@/utils/CheckAuth";
 import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "@/pages/NotFound";

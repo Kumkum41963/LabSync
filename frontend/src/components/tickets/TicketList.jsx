@@ -2,33 +2,42 @@ import React from "react";
 import TicketCard from "./TicketCard";
 import TicketTable from "./TicketTable";
 import { useRole } from "@/context/RoleContext";
+import { useTickets } from "@/context/TicketsContext";
 
-const TABLE_ROLES = ["admin", "moderator", "lab_assistant"]; 
-const TicketList = ({ tickets }) => {
+const TABLE_ROLES = ["admin", "moderator", "lab_assistant"];
+
+const TicketList = ({ tickets = [] }) => {
   const { role } = useRole();
-  console.log('current role:', role)
+  const { pagination } = useTickets(); // Removed unused getTickets
+  
   const isTableView = TABLE_ROLES.includes(role);
-  console.log('view is table:', isTableView)
+  const safeTickets = Array.isArray(tickets) ? tickets : [];
 
-  if (!tickets?.length) {
+  if (safeTickets.length === 0) {
     return (
-      <div className="text-center py-16 text-muted-foreground">
+      <div className="text-center py-16 text-muted-foreground text-sm">
         No tickets found.
       </div>
     );
   }
 
-  // TABLE VIEW
   if (isTableView) {
-    return <TicketTable tickets={tickets} role={role} />;
+    return (
+      <TicketTable
+        tickets={safeTickets}
+        pagination={pagination}
+        // Let TicketTable use the same page update mechanism if needed, 
+        // or let TicketTable rely on TicketCard/Tickets pagination
+      />
+    );
   }
 
-  // CARD LIST VIEW (existing)
   return (
     <div className="space-y-6">
-      {tickets.map((ticket) => (
-        <TicketCard key={ticket._id} ticket={ticket} />
-      ))}
+      {safeTickets.map((ticket) => {
+        if (!ticket || !ticket._id) return null;
+        return <TicketCard key={ticket._id} ticket={ticket} />;
+      })}
     </div>
   );
 };
