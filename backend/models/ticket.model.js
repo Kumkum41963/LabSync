@@ -16,7 +16,6 @@ const ticketSchema = new mongoose.Schema(
     tags: {
       type: [String],
       default: [],
-      required: [true, "Tags is required"],
       index: true,
     },
 
@@ -47,18 +46,17 @@ const ticketSchema = new mongoose.Schema(
       index: true,
     },
 
-    suggestedModerators: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        default: null,
-      }
-    ],
-
     assignedByLabAssistant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
+    },
+
+    aiStatus: {
+      type: String,
+      enum: ["pending", "processing", "completed", "failed"],
+      default: "pending",
+      index: true,
     },
 
     aiSummary: {
@@ -66,13 +64,42 @@ const ticketSchema = new mongoose.Schema(
       default: "",
     },
 
+    aiPriority: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      default: "medium",
+    },
+
+    aiGeneratedRequiredSkills: {
+      type: [String],
+      default: [],
+    },
+
+    moderatorSuggestions: {
+      type: [
+        {
+          moderatorId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+          },
+          matchScore: Number,
+          explanation: String,
+          suggestedAt: {
+            type: Date,
+            default: Date.now,
+          },
+        },
+      ],
+      default: [],
+    },
+
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Comment",
-      }
+      },
     ],
-    
+
     auditLog: [
       {
         actionBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
